@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Requests\Department;
+
+use App\Http\Requests\BaseFormRequest;
+use App\Models\Department;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+
+class UpdateDepartmentRequest extends BaseFormRequest
+{
+    public function authorize(): bool
+    {
+        return Gate::allows('update', Department::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                Rule::unique('departments', 'name')
+                    ->ignore($this->route('department')->id),
+            ],
+        ];
+    }
+}
