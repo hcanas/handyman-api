@@ -58,13 +58,16 @@ class UnbanUserTest extends TestCase
 
     public function test_succeeds_if_target_user_is_banned(): void
     {
+        $this->assertTrue($this->target_user->isBanned());
+
         $response = $this
             ->withCookie('token', $this->token)
             ->patchJson(route('unban-user'), [
                 'user_id' => $this->target_user->id,
             ]);
 
-        $this->assertTrue($this->target_user->isBanned());
+        $this->target_user->refresh();
+        $this->assertFalse($this->target_user->isBanned());
         $response->assertOk();
     }
 
