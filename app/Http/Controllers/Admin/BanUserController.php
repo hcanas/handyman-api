@@ -9,10 +9,8 @@ use Illuminate\Http\JsonResponse;
 
 class BanUserController extends Controller
 {
-    public function __invoke(BanUserRequest $request): JsonResponse
+    public function __invoke(BanUserRequest $request, User $user): JsonResponse
     {
-        $user = User::find($request->validated('user_id'));
-
         if ($user->isBanned()) {
             return response()->json([
                 'message' => 'User is already banned',

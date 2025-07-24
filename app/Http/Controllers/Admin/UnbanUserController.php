@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UnbanUserRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class UnbanUserController extends Controller
 {
-    public function __invoke(UnbanUserRequest $request)
+    public function __invoke(User $user)
     {
-        $user = User::find($request->validated('user_id'));
+        Gate::authorize('unban', $user);
 
         if (!$user->isBanned()) {
             return response()->json([

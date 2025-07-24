@@ -8,14 +8,12 @@ use App\Models\User;
 
 class DesignateUserController extends Controller
 {
-    public function __invoke(DesignateUserRequest $request)
+    public function __invoke(DesignateUserRequest $request, User $user)
     {
-        User::query()
-            ->where('id', $request->validated('user_id'))
-            ->update([
-                'role' => $request->validated('role'),
-                'department_id' => $request->validated('department_id'),
-            ]);
+        $user->update([
+            'role' => $request->validated('role'),
+            'department_id' => $request->validated('department_id'),
+        ]);
 
         return response()->json([
             'message' => 'User has been designated successfully',

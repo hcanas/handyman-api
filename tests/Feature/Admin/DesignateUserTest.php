@@ -32,8 +32,6 @@ class DesignateUserTest extends TestCase
     {
         parent::setUp();
 
-        $this->url = route('user.designate');
-
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
 
@@ -42,14 +40,14 @@ class DesignateUserTest extends TestCase
         $this->target_user = User::factory()->create();
         $this->department = Department::factory()->create();
 
+        $this->url = route('user.designate', ['user' => $this->target_user->id]);
+
         $this->valid_input = [
-            'user_id' => $this->target_user->id,
             'role' => UserRole::Staff->value,
             'department_id' => $this->department->id,
         ];
 
         $this->fields = [
-            'user_id',
             'role',
             'department_id',
         ];
@@ -88,7 +86,7 @@ class DesignateUserTest extends TestCase
 
         $response->assertOk();
         $this->assertDatabaseHas('users', [
-            'id' => $this->valid_input['user_id'],
+            'id' => $this->target_user->id,
             'role' => $this->valid_input['role'],
             'department_id' => $this->valid_input['department_id'],
         ]);
@@ -102,23 +100,6 @@ class DesignateUserTest extends TestCase
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors($this->fields);
-    }
-
-    public function test_fails_if_user_is_not_registered(): void
-    {
-        $user_id = 999;
-
-        $this->assertDatabaseMissing('users', ['id' => $user_id]);
-
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'), [
-                ...$this->valid_input,
-                'user_id' => $user_id
-            ]);
-
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['user_id']);
     }
 
     public function test_fails_if_role_is_invalid(): void

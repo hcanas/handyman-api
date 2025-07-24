@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', LogoutController::class)->name('logout');
         Route::patch('update-password', UpdatePasswordController::class)->name('update-password');
 
-        Route::prefix('user')->name('user.')->group(function () {
+        Route::prefix('user/{user}')->name('user.')->group(function () {
             Route::patch('designate', DesignateUserController::class)->name('designate');
             Route::patch('ban', BanUserController::class)->name('ban');
             Route::patch('unban', UnbanUserController::class)->name('unban');

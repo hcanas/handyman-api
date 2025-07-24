@@ -3,19 +3,18 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class BanUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::user()->isAdmin();
+        return Gate::allows('ban', $this->route('user'));
     }
 
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
             'ban_reason' => 'required|string',
         ];
     }

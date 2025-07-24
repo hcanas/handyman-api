@@ -27,16 +27,15 @@ class BanUserTest extends TestCase
     {
         parent::setUp();
 
-        $this->url = route('user.ban');
-
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->target_user = User::factory()->create(['role' => UserRole::Staff->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
 
         Sanctum::actingAs($this->auth_user);
 
+        $this->url = route('user.ban', ['user' => $this->target_user->id]);
+
         $this->fields = [
-            'user_id',
             'ban_reason',
         ];
     }
@@ -107,21 +106,5 @@ class BanUserTest extends TestCase
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors($this->fields);
-    }
-
-    public function test_fails_if_target_user_is_not_registered(): void
-    {
-        $user_id = 999;
-
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, [
-                'user_id' => $user_id,
-                'ban_reason' => $this->faker->sentence(),
-            ]);
-
-        $this->assertDatabaseMissing('users', ['id' => $user_id]);
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['user_id']);
     }
 }
