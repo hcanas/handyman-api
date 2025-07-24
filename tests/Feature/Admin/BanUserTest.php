@@ -19,16 +19,22 @@ class BanUserTest extends TestCase
 
     protected string $token;
 
+    protected array $fields;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
-
         $this->target_user = User::factory()->create(['role' => UserRole::Staff->value]);
-
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
+
         Sanctum::actingAs($this->auth_user);
+
+        $this->fields = [
+            'user_id',
+            'ban_reason',
+        ];
     }
 
     public function test_can_ban_if_authenticated_user_is_an_admin(): void
@@ -39,6 +45,7 @@ class BanUserTest extends TestCase
 
         $this->assertTrue($this->auth_user->isAdmin());
         $response->assertUnprocessable();
+        $response->assertJsonValidationErrors($this->fields);
     }
 
     public function test_can_not_ban_if_authenticated_user_is_not_an_admin(): void
@@ -55,6 +62,8 @@ class BanUserTest extends TestCase
 
     public function test_succeeds_if_target_user_is_active(): void
     {
+        $this->assertFalse($this->target_user->isBanned());
+
         $response = $this
             ->withCookie('token', $this->token)
             ->patchJson(route('ban-user'), [
@@ -63,9 +72,8 @@ class BanUserTest extends TestCase
             ]);
 
         $this->target_user->refresh();
-
-        $response->assertOk();
         $this->assertTrue($this->target_user->isBanned());
+        $response->assertOk();
     }
 
     public function test_fails_if_target_user_is_already_banned(): void
@@ -74,6 +82,8 @@ class BanUserTest extends TestCase
             'banned_at' => now(),
             'ban_reason' => $this->faker->sentence(),
         ]);
+
+        $this->assertTrue($this->target_user->isBanned());
 
         $response = $this
             ->withCookie('token', $this->token)
@@ -92,21 +102,21 @@ class BanUserTest extends TestCase
             ->patchJson(route('ban-user'));
 
         $response->assertUnprocessable();
-        $response->assertJsonValidationErrors([
-            'user_id',
-            'ban_reason',
-        ]);
+        $response->assertJsonValidationErrors($this->fields);
     }
 
     public function test_fails_if_target_user_is_not_registered(): void
     {
+        $user_id = 999;
+
         $response = $this
             ->withCookie('token', $this->token)
             ->patchJson(route('ban-user'), [
-                'user_id' => 999,
+                'user_id' => $user_id,
                 'ban_reason' => $this->faker->sentence(),
             ]);
 
+        $this->assertDatabaseMissing('users', ['id' => $user_id]);
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['user_id']);
     }
