@@ -13,6 +13,8 @@ class BanUserTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+    protected string $url;
+
     protected User $auth_user;
 
     protected User $target_user;
@@ -24,6 +26,8 @@ class BanUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->url = route('user.ban');
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->target_user = User::factory()->create(['role' => UserRole::Staff->value]);
@@ -41,7 +45,7 @@ class BanUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'));
+            ->patchJson($this->url);
 
         $this->assertTrue($this->auth_user->isAdmin());
         $response->assertUnprocessable();
@@ -54,7 +58,7 @@ class BanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'));
+            ->patchJson($this->url);
 
         $this->assertFalse($this->auth_user->isAdmin());
         $response->assertForbidden();
@@ -66,7 +70,7 @@ class BanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'), [
+            ->patchJson($this->url, [
                 'user_id' => $this->target_user->id,
                 'ban_reason' => $this->faker->sentence(),
             ]);
@@ -87,7 +91,7 @@ class BanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'), [
+            ->patchJson($this->url, [
                 'user_id' => $this->target_user->id,
                 'ban_reason' => $this->faker->sentence(),
             ]);
@@ -99,7 +103,7 @@ class BanUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'));
+            ->patchJson($this->url);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors($this->fields);
@@ -111,7 +115,7 @@ class BanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('ban-user'), [
+            ->patchJson($this->url, [
                 'user_id' => $user_id,
                 'ban_reason' => $this->faker->sentence(),
             ]);

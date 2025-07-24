@@ -34,9 +34,11 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', LogoutController::class)->name('logout');
         Route::patch('update-password', UpdatePasswordController::class)->name('update-password');
 
-        Route::patch('designate-user', DesignateUserController::class)->name('designate-user');
-        Route::patch('ban-user', BanUserController::class)->name('ban-user');
-        Route::patch('unban-user', UnbanUserController::class)->name('unban-user');
+        Route::prefix('user')->name('user.')->group(function () {
+            Route::patch('designate', DesignateUserController::class)->name('designate');
+            Route::patch('ban', BanUserController::class)->name('ban');
+            Route::patch('unban', UnbanUserController::class)->name('unban');
+        });
 
         Route::apiResource('departments', DepartmentController::class)->except('update');
         Route::patch('departments/{department}', [DepartmentController::class, 'update']);

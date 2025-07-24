@@ -13,6 +13,8 @@ class UnbanUserTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+    protected string $url;
+
     protected User $auth_user;
 
     protected User $target_user;
@@ -22,6 +24,8 @@ class UnbanUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->url = route('user.unban');
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
@@ -38,7 +42,7 @@ class UnbanUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'));
+            ->patchJson($this->url);
 
         $this->assertTrue($this->auth_user->isAdmin());
         $response->assertUnprocessable();
@@ -50,7 +54,7 @@ class UnbanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'));
+            ->patchJson($this->url);
 
         $this->assertFalse($this->auth_user->isAdmin());
         $response->assertForbidden();
@@ -62,7 +66,7 @@ class UnbanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'), [
+            ->patchJson($this->url, [
                 'user_id' => $this->target_user->id,
             ]);
 
@@ -80,7 +84,7 @@ class UnbanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'), [
+            ->patchJson($this->url, [
                 'user_id' => $this->target_user->id,
             ]);
 
@@ -92,7 +96,7 @@ class UnbanUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'));
+            ->patchJson($this->url);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['user_id']);
@@ -104,7 +108,7 @@ class UnbanUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('unban-user'), ['user_id' => $user_id]);
+            ->patchJson($this->url, ['user_id' => $user_id]);
 
         $this->assertDatabaseMissing('users', ['id' => $user_id]);
         $response->assertUnprocessable();

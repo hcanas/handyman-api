@@ -14,6 +14,8 @@ class DesignateUserTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+    protected string $url;
+
     protected User $auth_user;
 
     protected string $token;
@@ -29,6 +31,8 @@ class DesignateUserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->url = route('user.designate');
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
@@ -57,7 +61,7 @@ class DesignateUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'));
+            ->patchJson($this->url);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors($this->fields);
@@ -71,7 +75,7 @@ class DesignateUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'));
+            ->patchJson($this->url);
 
         $response->assertForbidden();
     }
@@ -80,7 +84,7 @@ class DesignateUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'), $this->valid_input);
+            ->patchJson($this->url, $this->valid_input);
 
         $response->assertOk();
         $this->assertDatabaseHas('users', [
@@ -94,7 +98,7 @@ class DesignateUserTest extends TestCase
     {
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'));
+            ->patchJson($this->url);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors($this->fields);
@@ -123,7 +127,7 @@ class DesignateUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'), [
+            ->patchJson($this->url, [
                 ...$this->valid_input,
                 'role' => $role,
             ]);
@@ -138,7 +142,7 @@ class DesignateUserTest extends TestCase
 
         $response = $this
             ->withCookie('token', $this->token)
-            ->patchJson(route('designate-user'), [
+            ->patchJson($this->url, [
                 ...$this->valid_input,
                 'department_id' => $department_id,
             ]);
