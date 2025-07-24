@@ -106,7 +106,7 @@ class UnbanUserTest extends TestCase
             ->withCookie('token', $this->token)
             ->patchJson(route('unban-user'), ['user_id' => $user_id]);
 
-        $this->assertDatabaseMissing('users', ['user_id' => $user_id]);
+        $this->assertDatabaseMissing('users', ['id' => $user_id]);
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['user_id']);
     }
