@@ -41,7 +41,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::apiResource('departments', DepartmentController::class)->except('update');
-        Route::patch('departments/{department}', [DepartmentController::class, 'update']);
+        Route::patch('departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
 
         Route::prefix('tickets')->group(function () {
             Route::get('/', ListTicketsController::class);
