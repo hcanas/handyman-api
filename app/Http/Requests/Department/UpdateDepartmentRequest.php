@@ -11,7 +11,7 @@ class UpdateDepartmentRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('update', Department::class);
+        return Gate::allows('update', $this->route('department'));
     }
 
     public function rules(): array
