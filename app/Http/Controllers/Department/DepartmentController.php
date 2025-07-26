@@ -45,7 +45,7 @@ class DepartmentController extends Controller
     {
         Gate::authorize('delete', $department);
 
-        if ($department->users()->exists()) {
+        if ($department->staff()->exists()) {
             return response()->json([
                 'message' => 'Cannot delete departments that have active users.',
             ], 409);
