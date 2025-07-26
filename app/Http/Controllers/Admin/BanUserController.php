@@ -20,6 +20,8 @@ class BanUserController extends Controller
         $user->update([
             'banned_at' => now(),
             'ban_reason' => $request->ban_reason,
+            'role' => null,
+            'department_id' => null,
         ]);
 
         return response()->json([
