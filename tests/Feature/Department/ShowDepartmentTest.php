@@ -7,7 +7,7 @@ use App\Models\User;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ShowDepartmentTest extends TestCase
@@ -22,48 +22,63 @@ class ShowDepartmentTest extends TestCase
 
     protected Department $target_department;
 
-    protected self $request;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
-        Sanctum::actingAs($this->auth_user);
-
-        $this->request = $this->withCookie('token', $this->token);
 
         $this->target_department = Department::factory()->create();
+
         $this->url = route('departments.show', ['department' => $this->target_department->id]);
     }
 
-    public function test_can_view_department_if_auth_user_is_an_admin(): void
+    public function test_admins_can_view_department(): void
     {
-        $this->assertTrue($this->auth_user->isAdmin());
-    }
-
-    public function test_cannot_view_department_if_auth_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-    }
-
-    public function test_returns_department_if_exists(): void
-    {
-        $response = $this->request->getJson($this->url);
+        $response = $this->withToken($this->token)->getJson($this->url);
 
         $response->assertOk();
     }
 
-    public function test_fails_if_department_does_not_exist(): void
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_view_department(UserRole $role): void
     {
-        $department_id = 999;
+        $this->auth_user->update(['role' => $role->value]);
 
-        $response = $this->request->getJson(route('departments.show', ['department' => $department_id]));
+        $response = $this->withToken($this->token)->getJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_undesignated_user_cannot_view_department(): void
+    {
+        $this->auth_user->update(['role' => null]);
+
+        $response = $this->withToken($this->token)->getJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_guests_cannot_view_department(): void
+    {
+        $response = $this->getJson($this->url);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_returns_error_if_department_does_not_exist(): void
+    {
+        $response = $this->withToken($this->token)->getJson(route('departments.show', ['department' => 999]));
 
         $response->assertNotFound();
-        $this->assertDatabaseMissing('departments', ['id' => $department_id]);
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
     }
 }

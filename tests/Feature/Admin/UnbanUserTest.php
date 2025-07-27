@@ -7,6 +7,7 @@ use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UnbanUserTest extends TestCase
@@ -17,9 +18,9 @@ class UnbanUserTest extends TestCase
 
     protected User $auth_user;
 
-    protected User $target_user;
-
     protected string $token;
+
+    protected User $target_user;
 
     protected function setUp(): void
     {
@@ -27,7 +28,6 @@ class UnbanUserTest extends TestCase
 
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
-        Sanctum::actingAs($this->auth_user);
 
         $this->target_user = User::factory()->create([
             'role' => UserRole::Staff->value,
@@ -38,14 +38,11 @@ class UnbanUserTest extends TestCase
         $this->url = route('user.unban', ['user' => $this->target_user->id]);
     }
 
-    public function test_can_unban_if_authenticated_user_is_an_admin(): void
+    public function test_admins_can_unban_banned_user(): void
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url);
+        $response = $this->withToken($this->token)->patchJson($this->url);
 
         $response->assertOk();
-        $this->assertTrue($this->auth_user->isAdmin());
         $this->assertDatabaseHas('users', [
             'id' => $this->target_user->id,
             'banned_at' => null,
@@ -53,47 +50,49 @@ class UnbanUserTest extends TestCase
         ]);
     }
 
-    public function test_cannot_unban_if_authenticated_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-        $response->assertForbidden();
-    }
-
-    public function test_succeeds_if_target_user_is_banned(): void
-    {
-        $this->assertTrue($this->target_user->isBanned());
-
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, [
-                'user_id' => $this->target_user->id,
-            ]);
-
-        $this->target_user->refresh();
-        $this->assertFalse($this->target_user->isBanned());
-        $response->assertOk();
-    }
-
-    public function test_fails_if_target_user_is_active(): void
+    public function test_admins_cannot_unban_active_user(): void
     {
         $this->target_user->update([
             'banned_at' => null,
             'ban_reason' => null,
         ]);
 
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, [
-                'user_id' => $this->target_user->id,
-            ]);
+        $response = $this->withToken($this->token)->patchJson($this->url);
 
-        $this->assertFalse($this->target_user->isBanned());
         $response->assertConflict();
+    }
+
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_unban_user(UserRole $role): void
+    {
+        $this->auth_user->update(['role' => $role->value]);
+
+        $response = $this->withToken($this->token)->patchJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_undesignated_users_cannot_unban_user(): void
+    {
+        $this->auth_user->update(['role' => null]);
+
+        $response = $this->withToken($this->token)->patchJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_guests_cannot_unban_user(): void
+    {
+        $response = $this->patchJson($this->url);
+
+        $response->assertUnauthorized();
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
     }
 }

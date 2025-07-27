@@ -7,7 +7,7 @@ use App\Models\User;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CreateDepartmentTest extends TestCase
@@ -20,76 +20,85 @@ class CreateDepartmentTest extends TestCase
 
     protected string $token;
 
-    protected self $request;
-
-    protected array $valid_input;
-
-    protected array $fields;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->url = route('departments.store');
 
-        $this->auth_user = User::factory()->create([
-            'role' => UserRole::Admin->value,
-        ]);
-
-        $this->token = $this->auth_user
-            ->createToken('web')
-            ->plainTextToken;
-
-        Sanctum::actingAs($this->auth_user);
-
-        $this->request = $this->withCookie('token', $this->token);
-
-        $this->valid_input = [
-            'name' => $this->faker->unique()->name,
-        ];
-
-        $this->fields = [
-            'name',
-        ];
+        $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
+        $this->token = $this->auth_user->createToken('web')->plainTextToken;
     }
 
-    public function test_can_create_department_if_authenticated_user_is_an_admin(): void
+    public function test_admins_can_create_department(): void
     {
-        $this->assertTrue($this->auth_user->isAdmin());
-    }
+        $name = fake()->word();
 
-    public function test_cannot_create_department_if_authenticated_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-    }
-
-    public function test_succeeds_if_input_is_valid(): void
-    {
-        $response = $this->request->postJson($this->url, $this->valid_input);
+        $response = $this->withToken($this->token)->postJson($this->url, ['name' => $name]);
 
         $response->assertCreated();
-        $this->assertDatabaseHas('departments', $this->valid_input);
+        $this->assertDatabaseHas('departments', ['name' => $name]);
     }
 
-    public function test_fails_if_input_is_empty(): void
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_create_department(UserRole $role): void
     {
-        $response = $this->request->postJson($this->url, []);
+        $this->auth_user->update(['role' => $role->value]);
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors($this->fields);
+        $response = $this->withToken($this->token)->postJson($this->url);
+
+        $response->assertForbidden();
     }
 
-    public function test_fails_if_name_is_duplicate(): void
+    public function test_undesignated_users_cannot_create_department(): void
     {
-        Department::factory()->create([
-            'name' => $this->valid_input['name'],
-        ]);
+        $this->auth_user->update(['role' => null]);
 
-        $response = $this->request->postJson($this->url, $this->valid_input);
+        $response = $this->withToken($this->token)->postJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_guests_cannot_create_department(): void
+    {
+        $response = $this->postJson($this->url, ['name' => fake()->word()]);
+
+        $response->assertUnauthorized();
+    }
+
+    #[DataProvider('invalidInputProvider')]
+    public function test_fails_all_validation_rules(array $input): void
+    {
+        if (isset($input['duplicate'])) {
+            Department::factory()->create(['name' => $input['duplicate']]);
+            $payload = ['name' => $input['duplicate']];
+        } elseif (isset($input['name'])) {
+            $payload = ['name' => $input['name']];
+        } else {
+            $payload = [];
+        }
+
+        $response = $this->withToken($this->token)->postJson($this->url, $payload);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['name']);
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
+    }
+
+    public static function invalidInputProvider(): array
+    {
+        return [
+            'empty_payload' => [[]],
+            'empty_fields' => [['name' => '']],
+            'characters_over_limit' => [['name' => str_repeat('a', 256)]],
+            'duplicate' => [['duplicate' => fake()->name]],
+        ];
     }
 }

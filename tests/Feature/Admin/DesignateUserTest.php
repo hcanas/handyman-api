@@ -7,7 +7,7 @@ use App\Models\User;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class DesignateUserTest extends TestCase
@@ -22,12 +22,6 @@ class DesignateUserTest extends TestCase
 
     protected User $target_user;
 
-    protected Department $department;
-
-    protected array $valid_input;
-
-    protected array $fields;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,100 +29,116 @@ class DesignateUserTest extends TestCase
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('web')->plainTextToken;
 
-        Sanctum::actingAs($this->auth_user);
-
         $this->target_user = User::factory()->create();
-        $this->department = Department::factory()->create();
 
         $this->url = route('user.designate', ['user' => $this->target_user->id]);
+    }
 
-        $this->valid_input = [
+    public function test_admins_can_designate_active_user(): void
+    {
+        $designation = [
             'role' => UserRole::Staff->value,
-            'department_id' => $this->department->id,
+            'department_id' => Department::factory()->create()->id,
         ];
 
-        $this->fields = [
-            'role',
-            'department_id',
+        $response = $this->withToken($this->token)->patchJson($this->url, $designation);
+
+        $response->assertOk();
+    }
+
+    public function test_admins_cannot_designate_banned_user(): void
+    {
+        $this->target_user->update(['banned_at' => now()]);
+
+        $designation = [
+            'role' => UserRole::Staff->value,
+            'department_id' => Department::factory()->create()->id,
         ];
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $designation);
+
+        $response->assertConflict();
     }
 
-    public function test_can_designate_user_if_authenticated_user_is_an_admin(): void
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_designate_user(UserRole $role): void
     {
-        $this->assertTrue($this->auth_user->isAdmin());
+        $this->auth_user->update(['role' => $role->value]);
 
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url);
-
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors($this->fields);
-    }
-
-    public function test_cannot_designate_user_if_authenticated_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url);
+        $response = $this->withToken($this->token)->patchJson($this->url);
 
         $response->assertForbidden();
     }
 
-    public function test_succeeds_if_input_is_valid(): void
+    public function test_undesignated_users_cannot_designate_user(): void
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, $this->valid_input);
+        $this->auth_user->update(['role' => null]);
 
-        $response->assertOk();
-        $this->assertDatabaseHas('users', [
-            'id' => $this->target_user->id,
-            'role' => $this->valid_input['role'],
-            'department_id' => $this->valid_input['department_id'],
-        ]);
+        $response = $this->withToken($this->token)->patchJson($this->url);
+
+        $response->assertForbidden();
     }
 
-    public function test_fails_if_input_is_empty(): void
+    public function test_guests_cannot_designate_user(): void
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url);
+        $response = $this->patchJson($this->url);
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors($this->fields);
+        $response->assertUnauthorized();
     }
 
-    public function test_fails_if_role_is_invalid(): void
+    #[DataProvider('invalidRoleProvider')]
+    public function test_invalid_role_fails_validation(array $input): void
     {
-        $role = 'invalid';
+        $designation = ['department_id' => Department::factory()->create()->id];
 
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, [
-                ...$this->valid_input,
-                'role' => $role,
-            ]);
+        if (isset($input['role'])) {
+            $designation['role'] = $input['role'];
+        }
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $designation);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['role']);
     }
 
-    public function test_fails_if_department_does_not_exist(): void
+    #[DataProvider('invalidDepartmentIdProvider')]
+    public function test_invalid_department_fails_validation(array $input): void
     {
-        $department_id = 999;
+        $designation = ['role' => UserRole::Staff->value];
 
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson($this->url, [
-                ...$this->valid_input,
-                'department_id' => $department_id,
-            ]);
+        if (isset($input['department_id'])) {
+            $designation['department_id'] = $input['department_id'];
+        }
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $designation);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['department_id']);
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
+    }
+
+    public static function invalidRoleProvider(): array
+    {
+        return [
+            'undefined' => [[]],
+            'empty' => [['role' => '']],
+            'not_in_list' => [['role' => 'fake role']],
+        ];
+    }
+
+    public static function invalidDepartmentIdProvider(): array
+    {
+        return [
+            'undefined' => [[]],
+            'empty' => [['department_id' => '']],
+            'does_not_exist' => [['department_id' => 999]],
+        ];
     }
 }

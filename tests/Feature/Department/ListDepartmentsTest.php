@@ -6,12 +6,12 @@ use App\Models\User;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ListDepartmentsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase;
 
     protected string $url;
 
@@ -19,43 +19,54 @@ class ListDepartmentsTest extends TestCase
 
     protected string $token;
 
-    protected self $request;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->url = route('departments.index');
 
-        $this->auth_user = User::factory()->create([
-            'role' => UserRole::Admin->value,
-        ]);
-
-        $this->token = $this->auth_user
-            ->createToken('web')
-            ->plainTextToken;
-
-        Sanctum::actingAs($this->auth_user);
-
-        $this->request = $this->withCookie('token', $this->token);
+        $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
+        $this->token = $this->auth_user->createToken('token')->plainTextToken;
     }
 
-    public function test_can_list_departments_if_authenticated_user_is_an_admin(): void
+    public function test_admins_can_view_department_list(): void
     {
-        $this->assertTrue($this->auth_user->isAdmin());
-    }
-
-    public function test_cannot_list_departments_if_authenticated_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-    }
-
-    public function test_returns_list_of_departments(): void
-    {
-        $response = $this->request->getJson($this->url);
+        $response = $this->withToken($this->token)->getJson($this->url);
 
         $response->assertOk();
+    }
+
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_view_department_list(UserRole $role): void
+    {
+        $this->auth_user->update(['role' => $role->value]);
+
+        $response = $this->withToken($this->token)->getJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_undesignated_users_cannot_view_department_list(): void
+    {
+        $this->auth_user->update(['role' => null]);
+
+        $response = $this->withToken($this->token)->getJson($this->url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_guests_cannot_view_department_list(): void
+    {
+        $response = $this->getJson($this->url);
+
+        $response->assertUnauthorized();
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
     }
 }

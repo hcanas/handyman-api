@@ -8,6 +8,7 @@ use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UpdateDepartmentTest extends TestCase
@@ -22,79 +23,90 @@ class UpdateDepartmentTest extends TestCase
 
     protected Department $target_department;
 
-    protected self $request;
-
-    protected array $valid_input;
-
-    protected array $fields;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->auth_user = User::factory()->create([
-            'role' => UserRole::Admin->value,
-        ]);
-
-        $this->token = $this->auth_user
-            ->createToken('web')
-            ->plainTextToken;
-
-        Sanctum::actingAs($this->auth_user);
+        $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
+        $this->token = $this->auth_user->createToken('web')->plainTextToken;
 
         $this->target_department = Department::factory()->create();
 
-        $this->url = route('departments.update', [
-            'department' => $this->target_department->id,
-        ]);
-
-        $this->request = $this->withCookie('token', $this->token);
-
-        $this->valid_input = [
-            'name' => $this->faker->unique()->name,
-        ];
-
-        $this->fields = [
-            'name',
-        ];
+        $this->url = route('departments.update', ['department' => $this->target_department->id]);
     }
 
-    public function test_can_update_department_if_authenticated_user_is_an_admin(): void
+    public function test_admins_can_update_department(): void
     {
-        $this->assertTrue($this->auth_user->isAdmin());
-    }
+        $name = fake()->name;
 
-    public function test_cannot_update_department_if_authenticated_user_is_not_an_admin(): void
-    {
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
-
-        $this->assertFalse($this->auth_user->isAdmin());
-    }
-
-    public function test_succeeds_if_input_is_valid(): void
-    {
-        $response = $this->request->patchJson($this->url, $this->valid_input);
+        $response = $this->withToken($this->token)->patchJson($this->url, ['name' => $name]);
 
         $response->assertOk();
-    }
-
-    public function test_fails_if_input_is_empty(): void
-    {
-        $response = $this->request->patchJson($this->url, []);
-
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors($this->fields);
-    }
-
-    public function test_fails_if_name_is_duplicate(): void
-    {
-        Department::factory()->create([
-            'name' => $this->valid_input['name'],
+        $this->assertDatabaseHas('departments', [
+            'id' => $this->target_department->id,
+            'name' => $name,
         ]);
+    }
 
-        $response = $this->request->patchJson($this->url, $this->valid_input);
+    #[DataProvider('nonAdminUsersProvider')]
+    public function test_non_admins_cannot_update_department(UserRole $role): void
+    {
+        $this->auth_user->update(['role' => $role->value]);
+
+        $response = $this->withToken($this->token)->patchJson($this->url, ['name' => fake()->name]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_undesignated_users_cannot_update_department(): void
+    {
+        $this->auth_user->update(['role' => null]);
+
+        $response = $this->withToken($this->token)->patchJson($this->url, ['name' => fake()->name]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_guests_cannot_update_department(): void
+    {
+        $response = $this->patchJson($this->url, ['name' => fake()->name]);
+
+        $response->assertUnauthorized();
+    }
+
+    #[DataProvider('invalidInputProvider')]
+    public function test_fails_all_validation_rules(array $input): void
+    {
+        if (isset($input['duplicate'])) {
+            Department::factory()->create(['name' => $input['duplicate']]);
+            $payload = ['name' => $input['duplicate']];
+        } elseif (isset($input['name'])) {
+            $payload = ['name' => $input['name']];
+        } else {
+            $payload = [];
+        }
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $payload);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['name']);
+    }
+
+    public static function nonAdminUsersProvider(): array
+    {
+        return [
+            'staff' => [UserRole::Staff],
+            'technician' => [UserRole::Technician],
+        ];
+    }
+
+    public static function invalidInputProvider(): array
+    {
+        return [
+            'empty_payload' => [[]],
+            'empty_fields' => [['name' => '']],
+            'characters_over_limit' => [['name' => str_repeat('a', 256)]],
+            'duplicate' => [['duplicate' => fake()->name]],
+        ];
     }
 }
