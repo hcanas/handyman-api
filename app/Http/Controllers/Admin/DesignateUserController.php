@@ -10,6 +10,12 @@ class DesignateUserController extends Controller
 {
     public function __invoke(DesignateUserRequest $request, User $user)
     {
+        if ($user->isBanned()) {
+            return response()->json([
+                'message' => 'Cannot designate banned users',
+            ], 409);
+        }
+
         $user->update([
             'role' => $request->validated('role'),
             'department_id' => $request->validated('department_id'),
