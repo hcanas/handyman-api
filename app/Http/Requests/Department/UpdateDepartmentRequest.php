@@ -19,6 +19,7 @@ class UpdateDepartmentRequest extends BaseFormRequest
         return [
             'name' => [
                 'required',
+                'max:255',
                 Rule::unique('departments', 'name')
                     ->ignore($this->route('department')->id),
             ],
