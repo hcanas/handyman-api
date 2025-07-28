@@ -4,116 +4,163 @@ namespace Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
-    protected array $valid_input = [
-        'email' => 'test@example.com',
-        'password' => '12345678',
-    ];
+    protected string $url;
 
-    protected array $validation_fields = [
-        'email',
-        'password',
-    ];
+    protected User $user;
 
-    public function test_web_login_succeeds_if_input_is_valid(): void
+    protected array $credentials;
+
+    protected array $headers;
+
+    protected function setUp(): void
     {
-        User::factory()->create([
-            'email' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
+        parent::setUp();
 
-        $response = $this->postJson(
-            uri: route('login'),
-            data: $this->valid_input,
-            headers: [
-                'X-Client-Platform' => 'web',
-            ],
-        );
+        $this->url = route('login');
+
+        $this->credentials = [
+            'email' => fake()->safeEmail(),
+            'password' => fake()->password(8),
+        ];
+
+        $this->user = User::factory()->create($this->credentials);
+
+        $this->headers = ['X-Client-Platform' => 'web'];
+    }
+
+    public function test_can_login_via_web_client(): void
+    {
+        $response = $this->postJson($this->url, $this->credentials, $this->headers);
 
         $response->assertOk();
         $response->assertCookie('token');
     }
 
-    public function test_mobile_login_succeeds_if_input_is_valid(): void
+    public function test_can_login_via_mobile_client(): void
     {
-        User::factory()->create([
-            'email' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
+        $this->headers['X-Client-Platform'] = 'mobile';
 
-        $response = $this->postJson(
-            uri: route('login'),
-            data: $this->valid_input,
-            headers: [
-                'X-Client-Platform' => 'mobile',
-            ],
-        );
+        $response = $this->postJson($this->url, $this->credentials, $this->headers);
 
         $response->assertOk();
         $response->assertJsonStructure(['token']);
     }
 
-    public function test_fails_if_client_platform_is_invalid(): void
+    #[DataProvider('invalidClientPlatformProvider')]
+    public function test_returns_400_if_client_platform_is_invalid(array $data): void
     {
-        $response = $this->postJson(route('login'), $this->valid_input);
+        $headers = [];
+
+        if (isset($data['platform'])) {
+            $headers['X-Client-Platform'] = $data['platform'];
+        }
+
+        $response = $this->postJson($this->url, $this->credentials, $headers);
 
         $response->assertBadRequest();
     }
 
-    public function test_fails_if_input_is_empty(): void
+    #[Dataprovider('invalidEmailProvider')]
+    public function test_invalid_email_fails_validation(?string $email = null): void
     {
-        $response = $this->postJson(route('login'));
+        $credentials = ['password' => $this->credentials['password']];
+
+        if ($email !== null) {
+            $credentials['email'] = $email;
+        }
+
+        $response = $this->postJson($this->url, $credentials, $this->headers);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['auth']);
     }
 
-    public function test_fails_if_email_is_invalid(): void
+    #[DataProvider('invalidPasswordProvider')]
+    public function test_invalid_password_fails_validation(?string $password = null): void
     {
-        $response = $this->postJson(route('login'), [
-            ...$this->valid_input,
-            'email' => 'invalid',
-        ]);
+        $credentials = ['email' => $this->credentials['email']];
+
+        if ($password !== null) {
+            $credentials['password'] = $password;
+        }
+
+        $response = $this->postJson($this->url, $credentials, $this->headers);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['auth']);
     }
 
-    public function test_fails_if_password_is_too_short(): void
+    #[DataProvider('incorrectCredentialsProvider')]
+    public function test_returns_401_if_incorrect_credentials(array $input): void
     {
-        $response = $this->postJson(route('login'), [
-            ...$this->valid_input,
-            'password' => '1',
-        ]);
+        $credentials = [
+            'email' => $input['email'] ?? $input['registered_email'],
+            'password' => $input['password'],
+        ];
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['auth']);
-    }
+        if (array_key_exists('registered_email', $input)) {
+            User::factory()->create(['email' => $input['registered_email']]);
+        }
 
-    public function test_fails_if_credentials_are_incorrect(): void
-    {
-        User::factory()->create([
-            'email' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
-
-        $response = $this->postJson(
-            uri: route('login'),
-            data: [
-                'email' => 'wrong@email.com',
-                'password' => 'wrong-password',
-            ],
-            headers: [
-                'X-Client-Platform' => 'web',
-            ],
-        );
+        $response = $this->postJson($this->url, $credentials, $this->headers);
 
         $response->assertUnauthorized();
+        $response->assertJsonStructure(['message']);
+    }
+
+    public static function invalidClientPlatformProvider(): array
+    {
+        return [
+            'undefined' => [[]],
+            'empty' => [['platform' => '']],
+            'invalid' => [['platform' => 'invalid']],
+        ];
+    }
+
+    public static function invalidEmailProvider(): array
+    {
+        return [
+            'undefined' => [],
+            'empty' => ['email' => ''],
+            'missing_at_symbol' => ['email' => 'abc.def.com'],
+            'missing_username' => ['email' => '@domain.com'],
+            'missing_domain' => ['email' => 'abc@'],
+            'double_at_symbols' => ['email' => 'abc@@domain.com'],
+            'space_in_email' => ['email' => 'abc def@domain.com'],
+            'starting_dot' => ['email' => '.abc@domain.com'],
+            'ending_dot' => ['email' => 'abc.@domain.com'],
+            'double_dot' => ['email' => 'abc..def@domain.com'],
+            'special_chars' => ['email' => 'abc@domain!.com'],
+            'no_domain' => ['email' => 'abc@.com'],
+            'just_at' => ['email' => '@'],
+            'characters_over_limit' => ['email' => str_repeat('a', 256)],
+        ];
+    }
+
+    public static function invalidPasswordProvider(): array
+    {
+        return [
+            'undefined' => [],
+            'empty' => ['password' => ''],
+            'short' => ['password' => str_repeat('a', 6)],
+            'character_over_limit' => ['password' => str_repeat('a', 256)],
+        ];
+    }
+
+    public static function incorrectCredentialsProvider(): array
+    {
+        return [
+            'unregistered_email' => [['email' => 'unregistered@email.com', 'password' => str_repeat('a', 8)]],
+            'incorrect_password' => [['registered_email' => fake()->safeEmail(), 'password' => str_repeat('a', 8)]],
+        ];
     }
 }
