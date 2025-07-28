@@ -37,7 +37,8 @@ class LoginController extends Controller
 
     private function generateWebClientResponse(): JsonResponse
     {
-        $token = Auth::user()->createToken('web')->plainTextToken;
+        $expires_at = now()->addHours(8);
+        $token = Auth::user()->createToken('web', ['*'], $expires_at)->plainTextToken;
         $cookie = cookie('token', $token, 60 * 8);
 
         return response()
@@ -49,7 +50,8 @@ class LoginController extends Controller
 
     private function generateMobileClientResponse(): JsonResponse
     {
-        $token = Auth::user()->createToken('mobile')->plainTextToken;
+        $expires_at = now()->addHours(8);
+        $token = Auth::user()->createToken('mobile', ['*'], $expires_at)->plainTextToken;
 
         return response()->json([
             'token' => $token,
