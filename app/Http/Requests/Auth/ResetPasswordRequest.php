@@ -10,10 +10,12 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|max:255',
-            'password' => 'required|confirmed|min:8',
+            'email' => 'bail|required|email|max:255',
+            'password' => 'bail|required|confirmed|min:8',
             'otp' => [
+                'bail',
                 'required',
+                'numeric',
                 'digits:6',
                 new ValidOtp($this->input('email', '')),
             ],
