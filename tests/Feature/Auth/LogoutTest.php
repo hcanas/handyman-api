@@ -4,85 +4,89 @@ namespace Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\Sanctum;
+use Laravel\Sanctum\PersonalAccessToken;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LogoutTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected array $valid_input = [
-        'email' => 'test@example.com',
-        'password' => '12345678',
-    ];
+    protected string $url;
 
-    public function test_web_logout_succeeds_if_user_is_authenticated(): void
+    protected User $auth_user;
+
+    protected string $token;
+
+    protected array $headers;
+
+    protected function setUp(): void
     {
-        $user = User::factory()->create([
-            'name' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
+        parent::setUp();
 
-        $token = $user->createToken('web')->plainTextToken;
+        $this->url = route('logout');
 
-        Sanctum::actingAs($user);
+        $this->auth_user = User::factory()->create();
+        $this->token = $this->auth_user->createToken('web')->plainTextToken;
 
-        $response = $this
-            ->withCookie('token', $token)
-            ->postJson(
-                uri: route('logout'),
-                headers: [
-                    'X-Client-Platform' => 'web',
-                ],
-            );
-
-        $response->assertOk();
+        $this->headers = ['X-Client-Platform' => 'web'];
     }
 
-    public function test_mobile_logout_succeeds_if_user_is_authenticated(): void
+    public function test_can_logout_if_user_is_authenticated(): void
     {
-        $user = User::factory()->create([
-            'name' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
+        $this->headers['Authorization'] = 'Bearer ' . $this->token;
 
-        $token = $user->createToken('mobile')->plainTextToken;
-
-        $response = $this
-            ->postJson(
-                uri: route('logout'),
-                headers: [
-                    'Authorization' => 'Bearer ' . $token,
-                    'X-Client-Platform' => 'mobile',
-                ],
-            );
+        $response = $this->postJson($this->url, [], $this->headers);
 
         $response->assertOk();
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'id' => explode('|', $this->token)[0],
+            'tokenable_id' => $this->auth_user->id,
+            'tokenable_type' => User::class,
+        ]);
     }
 
-    public function test_fails_if_platform_is_invalid(): void
+    #[DataProvider('invalidTokenProvider')]
+    public function test_returns_401_if_token_is_invalid(?string $token = null): void
     {
-        $user = User::factory()->create([
-            'name' => $this->valid_input['email'],
-            'password' => Hash::make($this->valid_input['password']),
-        ]);
+        if ($token === 'expired') {
+            $token_id = explode('|', $this->token)[0];
+            PersonalAccessToken::find($token_id)->update(['expires_at' => now()->subMinute()]);
+        }
 
-        $token = $user->createToken('web')->plainTextToken;
+        $this->headers['Authorization'] = 'Bearer ' . $token;
 
-        Sanctum::actingAs($user);
+        $response = $this->postJson($this->url, [], $this->headers);
 
-        $response = $this
-            ->withCookie('token', $token)
-            ->postJson(route('logout'));
+        $response->assertUnauthorized();
+    }
+
+    #[DataProvider('invalidClientPlatformProvider')]
+    public function test_returns_400_if_client_platform_is_invalid(?string $platform = null): void
+    {
+        $this->headers['X-Client-Platform'] = $platform;
+        $this->headers['Authorization'] = 'Bearer ' . $this->token;
+
+        $response = $this->postJson($this->url, [], $this->headers);
 
         $response->assertBadRequest();
     }
 
-    public function test_fails_if_user_is_unauthenticated(): void
+    public static function invalidTokenProvider(): array
     {
-        $response = $this->postJson(route('logout'));
+        return [
+            'undefined' => [],
+            'token_does_not_exist' => [fake()->sha256()],
+            'expired_token' => ['expired'],
+        ];
+    }
 
-        $response->assertUnauthorized();
+    public static function invalidClientPlatformProvider(): array
+    {
+        return [
+            'undefined' => [],
+            'empty' => [''],
+            'invalid' => ['invalid'],
+        ];
     }
 }
