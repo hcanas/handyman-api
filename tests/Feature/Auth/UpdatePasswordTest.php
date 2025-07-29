@@ -4,65 +4,75 @@ namespace Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UpdatePasswordTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected string $url;
+
     protected User $user;
 
     protected string $token;
 
-    protected array $valid_input = [
-        'password' => '12345678',
-        'password_confirmation' => '12345678',
-    ];
-
-    protected array $validation_fields = [
-        'password',
-    ];
+    protected array $valid_input;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->user = User::factory()->create();
-        Sanctum::actingAs($this->user);
+        $this->url = route('update-password');
 
+        $this->user = User::factory()->create();
         $this->token = $this->user->createToken('web')->plainTextToken;
+
+        $this->valid_input = [
+            'password' => '12345678',
+            'password_confirmation' => '12345678',
+        ];
     }
 
-    public function test_succeeds_if_input_is_valid(): void
+    public function test_can_update_password(): void
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson(route('update-password'), $this->valid_input);
+        $response = $this->withToken($this->token)->patchJson($this->url, $this->valid_input);
+
+        $this->user->refresh();
 
         $response->assertOk();
+        $this->assertTrue(Hash::check($this->valid_input['password'], $this->user->password));
     }
 
-    public function test_fails_if_input_is_empty(): void
+    public function test_guests_cannot_update_password(): void
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson(route('update-password'));
+        $response = $this->patchJson($this->url, $this->valid_input);
+
+        $response->assertUnauthorized();
+    }
+
+    #[DataProvider('invalidPasswordProvider')]
+    public function test_invalid_password_fails_validation(array $input): void
+    {
+        $invalid_input = [
+            'password' => $input['password'] ?? null,
+            'password_confirmation' => $input['password_confirmation'] ?? null,
+        ];
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $invalid_input);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['password']);
     }
 
-    public function test_fails_if_passwords_do_not_match(): void
+    public static function invalidPasswordProvider(): array
     {
-        $response = $this
-            ->withCookie('token', $this->token)
-            ->patchJson(route('update-password'), [
-                'password' => '12345678',
-                'password_confirmation' => '87654321',
-            ]);
-
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['password']);
+        return [
+            'undefined' => [[]],
+            'empty' => [['password' => '', 'password_confirmation' => '']],
+            'too_short' => [['password' => '123', 'password_confirmation' => '123']],
+            'mismatch' => [['password' => '12345678', 'password_confirmation' => '87654321']],
+        ];
     }
 }
