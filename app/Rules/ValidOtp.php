@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class ValidOtp implements ValidationRule
 {
     public function __construct(
-        private readonly string $email,
+        private readonly ?string $email,
     ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
