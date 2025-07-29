@@ -51,7 +51,7 @@ class SendResetPasswordOtpController extends Controller
 
     private function generateOtp(string $email): ?string
     {
-        $this->expireCurrentOtp($email);
+        $this->deleteCurrentOtp($email);
 
         $otp = rand(100000, 999999);
 
@@ -64,11 +64,11 @@ class SendResetPasswordOtpController extends Controller
         return $otp;
     }
 
-    private function expireCurrentOtp(string $email): void
+    private function deleteCurrentOtp(string $email): void
     {
         PasswordOtp::query()
             ->where('email', $email)
             ->where('expired_at', '>', now())
-            ->update(['expired_at' => now()]);
+            ->delete();
     }
 }
