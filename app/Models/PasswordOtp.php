@@ -13,6 +13,10 @@ class PasswordOtp extends Model
 
     protected $primaryKey = 'email';
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         'email',
         'otp',
