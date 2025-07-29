@@ -11,6 +11,8 @@ class PasswordOtp extends Model
 
     const UPDATED_AT = null;
 
+    protected $primaryKey = 'email';
+
     protected $fillable = [
         'email',
         'otp',
