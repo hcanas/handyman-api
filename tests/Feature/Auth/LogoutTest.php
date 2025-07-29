@@ -46,6 +46,13 @@ class LogoutTest extends TestCase
         ]);
     }
 
+    public function test_guests_cannot_logout(): void
+    {
+        $response = $this->postJson($this->url, [], $this->headers);
+
+        $response->assertUnauthorized();
+    }
+
     #[DataProvider('invalidTokenProvider')]
     public function test_returns_401_if_token_is_invalid(?string $token = null): void
     {
