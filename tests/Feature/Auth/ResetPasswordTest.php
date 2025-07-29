@@ -6,88 +6,149 @@ use App\Models\PasswordOtp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ResetPasswordTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    protected array $valid_input = [
-        'email' => 'test@example.com',
-        'password' => '12345678',
-        'password_confirmation' => '12345678',
-    ];
+    protected string $url;
 
-    protected array $validation_fields = [
-        'email',
-        'password',
-        'otp',
-    ];
+    protected User $user;
 
-    public function test_succeeds_if_input_is_valid(): void
+    protected PasswordOtp $password_otp;
+
+    protected array $valid_input;
+
+    protected function setUp(): void
     {
-        $user = User::factory()->create(['email' => $this->valid_input['email']]);
+        parent::setUp();
 
-        $password_otp = PasswordOtp::factory()->create(['email' => $user->email]);
+        $this->url = route('reset-password');
 
-        $response = $this->patchJson(route('reset-password'), [
-            ...$this->valid_input,
-            'otp' => $password_otp->otp,
-        ]);
+        $this->user = User::factory()->create();
+        $this->password_otp = PasswordOtp::factory()->create(['email' => $this->user->email]);
+
+        $this->valid_input = [
+            'email' => $this->user->email,
+            'password' => '12345678',
+            'password_confirmation' => '12345678',
+            'otp' => $this->password_otp->otp,
+        ];
+    }
+
+    public function test_can_reset_password_with_valid_input(): void
+    {
+        $response = $this->patchJson($this->url, $this->valid_input);
+
+        $this->user->refresh();
 
         $response->assertOk();
+        $this->assertTrue(Hash::check($this->valid_input['password'], $this->user->password));
+        $this->assertDatabaseMissing('password_otps', [
+            'email' => $this->password_otp->email,
+            'otp' => $this->password_otp->otp,
+        ]);
     }
 
-    public function test_fails_if_input_is_empty(): void
+    #[DataProvider('invalidEmailProvider')]
+    public function test_invalid_email_fails_validation(?string $email = null): void
     {
-        $response = $this->patchJson(route('reset-password'));
+        $invalid_input = [
+            ...$this->valid_input,
+            'email' => $email,
+        ];
+
+        $response = $this->patchJson($this->url, $invalid_input);
 
         $response->assertUnprocessable();
-        $response->assertJsonValidationErrors($this->validation_fields);
+        $response->assertJsonValidationErrors(['email']);
     }
 
-    public function test_fails_if_password_is_too_short(): void
+    #[DataProvider('invalidPasswordProvider')]
+    public function test_invalid_password_fails_validation(array $input): void
     {
-        $user = User::factory()->create(['email' => $this->valid_input['email']]);
-        $password_otp = PasswordOtp::factory()->create(['email' => $user->email]);
-
-        $response = $this->patchJson(route('reset-password'), [
+        $invalid_input = [
             ...$this->valid_input,
-            'otp' => $password_otp->otp,
-            'password' => '1',
-        ]);
+            'password' => $input['password'] ?? null,
+            'password_confirmation' => $input['password_confirmation'] ?? null,
+        ];
+
+        $response = $this->patchJson($this->url, $invalid_input);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['password']);
     }
 
-    public function test_fails_if_passwords_do_not_match(): void
+    #[DataProvider('invalidOtpProvider')]
+    public function test_invalid_otp_fails_validation(mixed $otp = null): void
     {
-        $user = User::factory()->create(['email' => $this->valid_input['email']]);
-        $password_otp = PasswordOtp::factory()->create(['email' => $user->email]);
+        if ($otp === 'expired') {
+            PasswordOtp::query()
+                ->where('email', $this->user->email)
+                ->where('otp', $this->password_otp->otp)
+                ->update(['expired_at' => now()->subMinute()]);
 
-        $response = $this->patchJson(route('reset-password'), [
+            $otp = $this->password_otp->otp;
+        }
+
+        $invalid_input = [
             ...$this->valid_input,
-            'otp' => $password_otp->otp,
-            'password_confirmation' => 'mismatch',
-        ]);
+            'otp' => $otp,
+        ];
 
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['password']);
-    }
-
-    public function test_fails_if_otp_is_invalid(): void
-    {
-        $user = User::factory()->create(['email' => $this->valid_input['email']]);
-        PasswordOtp::factory()->create(['email' => $user->email]);
-        $invalid_otp = $this->faker->unique()->randomNumber(6, true);
-
-        $response = $this->patchJson(route('reset-password'), [
-            $this->valid_input,
-            'otp' => $invalid_otp,
-        ]);
+        $response = $this->patchJson($this->url, $invalid_input);
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['otp']);
+    }
+
+    public static function invalidEmailProvider(): array
+    {
+        return [
+            'undefined' => [],
+            'empty' => [''],
+            'missing_at_symbol' => ['abc.def.com'],
+            'missing_username' => ['@domain.com'],
+            'missing_domain' => ['abc@'],
+            'double_at_symbols' => ['abc@@domain.com'],
+            'space_in_email' => ['abc def@domain.com'],
+            'starting_dot' => ['.abc@domain.com'],
+            'ending_dot' => ['abc.@domain.com'],
+            'double_dot' => ['abc..def@domain.com'],
+            'special_chars' => ['abc@domain!.com'],
+            'no_domain' => ['abc@.com'],
+            'just_at' => ['@'],
+            'characters_over_limit' => [str_repeat('a', 256)],
+        ];
+    }
+
+    public static function invalidPasswordProvider(): array
+    {
+        return [
+            'undefined' => [[]],
+            'empty' => [['password' => '', 'password_confirmation' => '']],
+            'too_short' => [['password' => '123', 'password_confirmation' => '123']],
+            'mismatch' => [['password' => '12345678', 'password_confirmation' => '87654321']],
+        ];
+    }
+
+    public static function invalidOtpProvider(): array
+    {
+        return [
+            'undefined' => [],
+            'empty' => [''],
+            'too_short' => ['12345'],
+            'too_long' => ['1234567'],
+            'not_numeric' => ['abcdef'],
+            'contains_letters' => ['12a456'],
+            'null_value' => [null],
+            'boolean_true' => [true],
+            'boolean_false' => [false],
+            'array_value' => [[123456]],
+            'expired' => ['expired'],
+        ];
     }
 }
