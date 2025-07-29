@@ -11,12 +11,13 @@ class ResetPasswordController extends Controller
 {
     public function __invoke(ResetPasswordRequest $request)
     {
-        User::query()
+        $user = User::query()
             ->where('email', $request->validated('email'))
-            ->update([
-                'password' => Hash::make($request->password),
-            ]);
+            ->first();
 
+        $user?->update(['password' => Hash::make($request->password)]);
+
+        // do not return an error if user doesn't exist for security purposes
         return response()->json([
             'message' => 'New password has been saved',
         ]);
