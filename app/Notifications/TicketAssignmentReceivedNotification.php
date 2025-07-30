@@ -13,7 +13,7 @@ class TicketAssignmentReceivedNotification extends Notification implements Shoul
     use Queueable;
 
     public function __construct(
-        private readonly Ticket $ticket,
+        public readonly Ticket $ticket,
     ) {}
 
     public function via(object $notifiable): array
