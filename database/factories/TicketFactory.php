@@ -23,7 +23,7 @@ class TicketFactory extends Factory
             'description' => $this->faker->paragraph(),
             'priority_level' => $this->faker->randomElement(TicketPriorityLevel::cases()),
             'status' => $this->faker->randomElement(TicketStatus::cases()),
-            'reported_by_id' => null,
+            'reported_by_id' => $this->faker->randomNumber(),
             'assigned_to_id' => null,
             'department_name_snapshot' => $this->faker->name,
             'resolved_at' => null,
