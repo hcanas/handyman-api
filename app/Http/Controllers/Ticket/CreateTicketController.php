@@ -26,6 +26,7 @@ class CreateTicketController extends Controller
 
             $ticket = Ticket::create([
                 ...$request->validated(),
+                'reported_by_id' => Auth::id(),
                 'status' => TicketStatus::Pending->value,
                 'department_name_snapshot' => Auth::user()->department->name,
             ]);
