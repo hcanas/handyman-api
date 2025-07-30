@@ -8,6 +8,7 @@ use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\TicketCreatedNotification;
+use App\TicketStatus;
 use App\UserRole;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,7 @@ class CreateTicketController extends Controller
 
             $ticket = Ticket::create([
                 ...$request->validated(),
+                'status' => TicketStatus::Pending->value,
                 'department_name_snapshot' => Auth::user()->department->name,
             ]);
 

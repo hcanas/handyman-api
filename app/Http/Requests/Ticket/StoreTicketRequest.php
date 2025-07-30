@@ -25,10 +25,6 @@ class StoreTicketRequest extends BaseFormRequest
                 'required',
                 Rule::in(TicketPriorityLevel::cases()),
             ],
-            'status' => [
-                'required',
-                Rule::in(TicketStatus::cases()),
-            ],
             'reported_by_id' => 'required|exists:users,id',
         ];
     }
