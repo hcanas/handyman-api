@@ -9,7 +9,7 @@ class TicketPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() 
+        return $user->isAdmin()
             || $user->isStaff()
             || $user->isTechnician();
     }
@@ -28,10 +28,9 @@ class TicketPolicy
 
     public function update(User $user, Ticket $ticket): bool
     {
-        return ($ticket->reported_by_id === $user->id 
-                && ($ticket->isPending() || $ticket->isResolved()))
-            || ($user->isTechnician() && $ticket->isInProgress())
-            || $user->isAdmin();
+        return $ticket->isPending() &&
+            $ticket->reported_by_id === $user->id &&
+            $user->isStaff();
     }
 
     public function assign(User $user, Ticket $ticket): bool
