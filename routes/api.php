@@ -44,18 +44,18 @@ Route::prefix('v1')->group(function () {
         Route::patch('departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
 
         Route::prefix('tickets')->group(function () {
-            Route::get('/', ListTicketsController::class);
-            Route::post('/', CreateTicketController::class);
-            Route::get('{ticket}', ShowTicketController::class);
-            Route::patch('{ticket}', UpdateTicketController::class);
-            Route::patch('{ticket}/assign', AssignTicketController::class);
-            Route::patch('{ticket}/resolve', ResolveTicketController::class);
-            Route::patch('{ticket}/reject-resolution', RejectTicketResolutionController::class);
-            Route::patch('{ticket}/close', CloseTicketController::class);
-            Route::patch('{ticket}/cancel', CancelTicketController::class);
-            Route::get('{ticket}/comments', ListCommentsController::class);
-            Route::post('{ticket}/comments', AddCommentController::class);
-            Route::get('{ticket}/logs', ShowTicketLogsController::class);
+            Route::get('/', ListTicketsController::class)->name('tickets.index');
+            Route::post('/', CreateTicketController::class)->name('tickets.store');
+            Route::get('{ticket}', ShowTicketController::class)->name('tickets.show');
+            Route::patch('{ticket}', UpdateTicketController::class)->name('tickets.update');
+            Route::patch('{ticket}/assign', AssignTicketController::class)->name('tickets.assign');
+            Route::patch('{ticket}/resolve', ResolveTicketController::class)->name('tickets.resolve');
+            Route::patch('{ticket}/reject-resolution', RejectTicketResolutionController::class)->name('tickets.reject-resolution');
+            Route::patch('{ticket}/close', CloseTicketController::class)->name('tickets.close');
+            Route::patch('{ticket}/cancel', CancelTicketController::class)->name('tickets.cancel');
+            Route::get('{ticket}/comments', ListCommentsController::class)->name('ticket.comments.index');
+            Route::post('{ticket}/comments', AddCommentController::class)->name('ticket.comments.store');
+            Route::get('{ticket}/logs', ShowTicketLogsController::class)->name('ticket.logs.index');
         });
     });
 });
