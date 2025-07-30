@@ -21,7 +21,6 @@ class ListTicketsRequest extends BaseFormRequest
             'per_page' => 'sometimes|numeric|min:0',
             'order_by' => [
                 'sometimes',
-                'required_with:order_dir',
                 Rule::in([
                     'created_at',
                     'updated_at',
@@ -31,7 +30,6 @@ class ListTicketsRequest extends BaseFormRequest
             ],
             'order_dir' => [
                 'sometimes',
-                'required_with:order_by',
                 Rule::in([
                     'asc',
                     'desc',
