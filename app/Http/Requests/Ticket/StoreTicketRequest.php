@@ -21,11 +21,10 @@ class StoreTicketRequest extends BaseFormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
-            'priority' => [
+            'priority_level' => [
                 'required',
                 Rule::in(TicketPriorityLevel::cases()),
             ],
-            'reported_by_id' => 'required|exists:users,id',
         ];
     }
 }
