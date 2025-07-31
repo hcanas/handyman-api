@@ -28,11 +28,12 @@ class ListTicketsController extends Controller
                 if ($user->isStaff()) {
                     $query = $query->where('reported_by_id', $user->id);
                 } elseif ($user->isTechnician()) {
-                    $query = $query->whereHas('logs', function ($logs_query) use ($user) {
-                        $logs_query
-                            ->where('action', TicketAction::ReceivedAssignment->value)
-                            ->where('user_id', $user->id);
-                    });
+                    $query = $query->where('assigned_to_id', $user->id)
+                        ->orWhereHas('logs', function ($logs_query) use ($user) {
+                            $logs_query
+                                ->where('action', TicketAction::ReceivedAssignment->value)
+                                ->where('user_id', $user->id);
+                        });
                 }
 
                 return $query
