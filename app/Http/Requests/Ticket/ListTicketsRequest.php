@@ -17,8 +17,8 @@ class ListTicketsRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'page' => 'sometimes|numeric|min:0',
-            'per_page' => 'sometimes|numeric|min:0',
+            'page' => 'sometimes|numeric|min:1',
+            'per_page' => 'sometimes|numeric|min:1',
             'order_by' => [
                 'sometimes',
                 Rule::in([
