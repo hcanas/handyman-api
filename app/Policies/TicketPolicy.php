@@ -10,9 +10,7 @@ class TicketPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin()
-            || $user->isStaff()
-            || $user->isTechnician();
+        return $user->id !== null;
     }
 
     public function view(User $user, Ticket $ticket): bool

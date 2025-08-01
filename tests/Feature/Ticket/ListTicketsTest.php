@@ -30,7 +30,7 @@ class ListTicketsTest extends TestCase
 
         $this->url = route('tickets.index');
 
-        $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
+        $this->auth_user = User::factory()->create();
         $this->token = $this->auth_user->createToken('token')->plainTextToken;
 
         $this->expected_data_structure = [
@@ -45,11 +45,17 @@ class ListTicketsTest extends TestCase
             'status',
         ];
 
-        Ticket::factory()->count(20)->create();
+        Ticket::factory()
+            ->for(User::factory(), 'reporter')
+            ->for(User::factory(), 'assignee')
+            ->count(20)
+            ->create();
     }
 
     public function test_admins_can_list_all_tickets(): void
     {
+        $this->auth_user->update(['role' => UserRole::Admin->value]);
+
         $response = $this->withToken($this->token)->getJson($this->url);
 
         $expected_ids = Ticket::paginate()->pluck('id')->values()->all();
@@ -67,11 +73,9 @@ class ListTicketsTest extends TestCase
         $this->assertEquals($expected_ids, $returned_ids);
     }
 
-    public function test_staff_can_list_own_tickets(): void
+    public function test_user_can_list_reported_tickets(): void
     {
         $tickets = Ticket::factory()->count(15)->create(['reported_by_id' => $this->auth_user->id]);
-
-        $this->auth_user->update(['role' => UserRole::Staff->value]);
 
         $response = $this->withToken($this->token)->getJson($this->url);
 
@@ -90,7 +94,7 @@ class ListTicketsTest extends TestCase
         $this->assertEquals($expected_ids, $returned_ids);
     }
 
-    public function test_technicians_can_list_assigned_tickets(): void
+    public function test_user_can_list_assigned_tickets(): void
     {
         $tickets = Ticket::factory()->count(15)->create(['assigned_to_id' => $this->auth_user->id]);
 
@@ -113,7 +117,7 @@ class ListTicketsTest extends TestCase
         $this->assertEquals($expected_ids, $returned_ids);
     }
 
-    public function test_technicians_can_list_previously_assigned_tickets(): void
+    public function test_user_can_list_previously_assigned_tickets(): void
     {
         $assigned_to_id = $this->auth_user->id;
         $reassigned_to_id = User::factory()->create()->id;
@@ -171,15 +175,6 @@ class ListTicketsTest extends TestCase
         if (isset($params['per_page'])) {
             $this->assertEquals($params['per_page'], $response->json('meta.per_page'));
         }
-    }
-
-    public function test_undesignated_users_cannot_list_tickets(): void
-    {
-        $this->auth_user->update(['role' => null]);
-
-        $response = $this->withToken($this->token)->getJson($this->url);
-
-        $response->assertForbidden();
     }
 
     public function test_guests_cannot_list_tickets(): void

@@ -25,15 +25,15 @@ class ListTicketsController extends Controller
             ->remember($cache_key, $cache_ttl, function () use ($request, $user) {
                 $query = Ticket::query();
 
-                if ($user->isStaff()) {
-                    $query = $query->where('reported_by_id', $user->id);
-                } elseif ($user->isTechnician()) {
-                    $query = $query->where('assigned_to_id', $user->id)
+                if (!$user->isAdmin()) {
+                    $query = $query->where('reported_by_id', $user->id)
+                        ->orWhere('assigned_to_id', $user->id)
                         ->orWhereHas('logs', function ($logs_query) use ($user) {
                             $logs_query
                                 ->where('action', TicketAction::ReceivedAssignment->value)
                                 ->where('user_id', $user->id);
-                        });
+                        })
+                        ->orWhere($user->isAdmin());
                 }
 
                 return $query
