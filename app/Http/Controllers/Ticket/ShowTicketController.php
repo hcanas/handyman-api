@@ -9,8 +9,12 @@ use Illuminate\Support\Facades\Gate;
 
 class ShowTicketController extends Controller
 {
-    public function __invoke(Ticket $ticket): TicketResource
+    public function __invoke(int $ticket_id): TicketResource
     {
+        $ticket = Ticket::query()
+            ->with(['reporter', 'assignee'])
+            ->findOrFail($ticket_id);
+
         Gate::authorize('view', $ticket);
 
         return new TicketResource($ticket);
