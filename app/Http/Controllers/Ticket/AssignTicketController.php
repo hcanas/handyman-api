@@ -29,11 +29,13 @@ class AssignTicketController extends Controller
             $ticket->fill([
                 'assigned_to_id' => $assigned_user->id,
                 'status' => TicketStatus::InProgress->value,
-            ])->save();
+            ]);
 
             $this->logActions($request, $ticket, $assigned_user);
             $this->notifyUsers($ticket, $assigned_user);
             $this->clearCache($ticket);
+
+            $ticket->save();
 
             DB::commit();
 
@@ -53,7 +55,7 @@ class AssignTicketController extends Controller
 
     private function logActions(AssignTicketRequest $request, Ticket $ticket, User $assigned_user): void
     {
-        $action = $ticket->getOriginal('assigned_to_id') !== $ticket->assigned_to_id
+        $action = $ticket->getOriginal('assigned_to_id') !== null
             ? TicketAction::Reassign
             : TicketAction::Assign;
 
