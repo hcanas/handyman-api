@@ -44,7 +44,19 @@ class ListTicketsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'priority_level',
+                        'reported_by',
+                        'assigned_to',
+                        'department_name',
+                        'resolved_at',
+                        'status',
+                    ],
+                ],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -67,7 +79,19 @@ class ListTicketsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'priority_level',
+                        'reported_by',
+                        'assigned_to',
+                        'department_name',
+                        'resolved_at',
+                        'status',
+                    ],
+                ],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -90,7 +114,19 @@ class ListTicketsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'priority_level',
+                        'reported_by',
+                        'assigned_to',
+                        'department_name',
+                        'resolved_at',
+                        'status',
+                    ],
+                ],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -133,7 +169,19 @@ class ListTicketsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'priority_level',
+                        'reported_by',
+                        'assigned_to',
+                        'department_name',
+                        'resolved_at',
+                        'status',
+                    ],
+                ],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
