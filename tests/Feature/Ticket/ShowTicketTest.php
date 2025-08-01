@@ -23,6 +23,8 @@ class ShowTicketTest extends TestCase
 
     protected Ticket $target_ticket;
 
+    protected array $expected_data_structure;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,6 +35,18 @@ class ShowTicketTest extends TestCase
         $this->target_ticket = Ticket::factory()->create();
 
         $this->url = route('tickets.show', ['ticket' => $this->target_ticket->id]);
+
+        $this->expected_data_structure = [
+            'id',
+            'title',
+            'description',
+            'priority_level',
+            'reported_by',
+            'assigned_to',
+            'department_name',
+            'resolved_at',
+            'status',
+        ];
     }
 
     public function test_admins_can_view_ticket(): void
@@ -42,19 +56,7 @@ class ShowTicketTest extends TestCase
         $response = $this->withToken($this->token)->get($this->url);
 
         $response->assertOk();
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'title',
-                'description',
-                'priority_level',
-                'reported_by',
-                'assigned_to',
-                'department_name',
-                'resolved_at',
-                'status',
-            ],
-        ]);
+        $response->assertJsonStructure(['data' => $this->expected_data_structure]);
     }
 
     public function test_reporter_can_view_ticket(): void
@@ -64,19 +66,7 @@ class ShowTicketTest extends TestCase
         $response = $this->withToken($this->token)->get($this->url);
 
         $response->assertOk();
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'title',
-                'description',
-                'priority_level',
-                'reported_by',
-                'assigned_to',
-                'department_name',
-                'resolved_at',
-                'status',
-            ],
-        ]);
+        $response->assertJsonStructure(['data' => $this->expected_data_structure]);
     }
 
     public function test_assignee_can_view_ticket(): void
@@ -86,19 +76,7 @@ class ShowTicketTest extends TestCase
         $response = $this->withToken($this->token)->get($this->url);
 
         $response->assertOk();
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'title',
-                'description',
-                'priority_level',
-                'reported_by',
-                'assigned_to',
-                'department_name',
-                'resolved_at',
-                'status',
-            ],
-        ]);
+        $response->assertJsonStructure(['data' => $this->expected_data_structure]);
     }
 
     public function test_previous_assignees_can_view_ticket(): void
@@ -128,19 +106,7 @@ class ShowTicketTest extends TestCase
         $response = $this->withToken($this->token)->getJson($this->url);
 
         $response->assertOk();
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'title',
-                'description',
-                'priority_level',
-                'reported_by',
-                'assigned_to',
-                'department_name',
-                'resolved_at',
-                'status',
-            ],
-        ]);
+        $response->assertJsonStructure(['data' => $this->expected_data_structure]);
     }
 
     public function test_guests_cannot_view_ticket(): void

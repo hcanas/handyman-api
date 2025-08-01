@@ -22,6 +22,8 @@ class ListTicketsTest extends TestCase
 
     protected string $token;
 
+    protected array $expected_data_structure;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,32 +33,31 @@ class ListTicketsTest extends TestCase
         $this->auth_user = User::factory()->create(['role' => UserRole::Admin->value]);
         $this->token = $this->auth_user->createToken('token')->plainTextToken;
 
+        $this->expected_data_structure = [
+            'id',
+            'title',
+            'description',
+            'priority_level',
+            'reported_by',
+            'assigned_to',
+            'department_name',
+            'resolved_at',
+            'status',
+        ];
+
         Ticket::factory()->count(20)->create();
     }
 
     public function test_admins_can_list_all_tickets(): void
     {
-        $expected_ids = Ticket::paginate()->pluck('id')->values()->all();
-
         $response = $this->withToken($this->token)->getJson($this->url);
 
+        $expected_ids = Ticket::paginate()->pluck('id')->values()->all();
         $returned_ids = collect($response->json('data'))->pluck('id')->values()->all();
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'priority_level',
-                        'reported_by',
-                        'assigned_to',
-                        'department_name',
-                        'resolved_at',
-                        'status',
-                    ],
-                ],
+                'data' => ['*' => $this->expected_data_structure],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -69,29 +70,17 @@ class ListTicketsTest extends TestCase
     public function test_staff_can_list_own_tickets(): void
     {
         $tickets = Ticket::factory()->count(15)->create(['reported_by_id' => $this->auth_user->id]);
-        $expected_ids = $tickets->pluck('id')->values()->all();
 
         $this->auth_user->update(['role' => UserRole::Staff->value]);
 
         $response = $this->withToken($this->token)->getJson($this->url);
 
+        $expected_ids = $tickets->pluck('id')->values()->all();
         $returned_ids = collect($response->json('data'))->pluck('id')->values()->all();
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'priority_level',
-                        'reported_by',
-                        'assigned_to',
-                        'department_name',
-                        'resolved_at',
-                        'status',
-                    ],
-                ],
+                'data' => ['*' => $this->expected_data_structure],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -104,29 +93,17 @@ class ListTicketsTest extends TestCase
     public function test_technicians_can_list_assigned_tickets(): void
     {
         $tickets = Ticket::factory()->count(15)->create(['assigned_to_id' => $this->auth_user->id]);
-        $expected_ids = $tickets->pluck('id')->values()->all();
 
         $this->auth_user->update(['role' => UserRole::Technician->value]);
 
         $response = $this->withToken($this->token)->getJson($this->url);
 
+        $expected_ids = $tickets->pluck('id')->values()->all();
         $returned_ids = collect($response->json('data'))->pluck('id')->values()->all();
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'priority_level',
-                        'reported_by',
-                        'assigned_to',
-                        'department_name',
-                        'resolved_at',
-                        'status',
-                    ],
-                ],
+                'data' => ['*' => $this->expected_data_structure],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
@@ -144,7 +121,7 @@ class ListTicketsTest extends TestCase
         $tickets = Ticket::factory()
             ->has(TicketLog::factory()
                 ->count(2)
-                ->state(function (array $attr, Ticket $ticket) use ($assigned_to_id, $reassigned_to_id) {
+                ->state(function () use ($assigned_to_id, $reassigned_to_id) {
                     static $assigned = false;
 
                     $user_id = $assigned ? $reassigned_to_id : $assigned_to_id;
@@ -159,29 +136,16 @@ class ListTicketsTest extends TestCase
             ->count(15)
             ->create(['assigned_to_id' => $reassigned_to_id]);
 
-        $expected_ids = $tickets->pluck('id')->values()->all();
-
         $this->auth_user->update(['role' => UserRole::Technician->value]);
 
         $response = $this->withToken($this->token)->getJson($this->url);
 
+        $expected_ids = $tickets->pluck('id')->values()->all();
         $returned_ids = collect($response->json('data'))->pluck('id')->values()->all();
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'description',
-                        'priority_level',
-                        'reported_by',
-                        'assigned_to',
-                        'department_name',
-                        'resolved_at',
-                        'status',
-                    ],
-                ],
+                'data' => ['*' => $this->expected_data_structure],
                 'links' => ['first', 'last', 'prev', 'next'],
                 'meta' => ['current_page', 'last_page', 'per_page', 'total'],
             ]);
