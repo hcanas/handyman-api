@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\TicketAction;
 
 class TicketPolicy
 {
@@ -18,7 +19,11 @@ class TicketPolicy
     {
         return $user->isAdmin()
             || $ticket->reported_by_id === $user->id
-            || $ticket->assigned_to_id === $user->id;
+            || $ticket->assigned_to_id === $user->id
+            || $ticket->logs()
+                ->where('user_id', $user->id)
+                ->where('action', TicketAction::ReceivedAssignment->value)
+                ->exists();
     }
 
     public function create(User $user): bool
