@@ -23,7 +23,8 @@ class ListTicketsController extends Controller
 
         $tickets = Cache::tags($cache_tags)
             ->remember($cache_key, $cache_ttl, function () use ($request, $user) {
-                $query = Ticket::query();
+                $query = Ticket::query()
+                    ->with(['reporter', 'assignee']);
 
                 if (!$user->isAdmin()) {
                     $query = $query->where('reported_by_id', $user->id)
