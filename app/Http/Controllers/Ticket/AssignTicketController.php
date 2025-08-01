@@ -53,7 +53,9 @@ class AssignTicketController extends Controller
 
     private function logActions(AssignTicketRequest $request, Ticket $ticket, User $assigned_user): void
     {
-        $action = $ticket->assigned_to_id ? TicketAction::Reassign : TicketAction::Assign;
+        $action = $ticket->getOriginal('assigned_to_id') !== $ticket->assigned_to_id
+            ? TicketAction::Reassign
+            : TicketAction::Assign;
 
         TicketLog::create([
             'ticket_id' => $ticket->id,
