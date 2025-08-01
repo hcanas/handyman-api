@@ -18,7 +18,7 @@ class AssignTicketRequest extends BaseTicketStatusRequest
     public function rules(): array
     {
         return [
-            'user_id' => [
+            'assigned_to_id' => [
                 'required',
                 Rule::exists('users', 'id')
                     ->where('role', UserRole::Technician->value),
@@ -30,7 +30,7 @@ class AssignTicketRequest extends BaseTicketStatusRequest
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status);
+            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status->value);
 
             if (
                 $ticket_status !== TicketStatus::InProgress &&

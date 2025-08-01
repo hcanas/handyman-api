@@ -24,10 +24,10 @@ class AssignTicketController extends Controller
         try {
             DB::beginTransaction();
 
-            $assigned_user = User::find($request->validated('user_id'));
+            $assigned_user = User::find($request->validated('assigned_to_id'));
 
             $ticket->fill([
-                'assigned_to_id' => $request->validated('user_id'),
+                'assigned_to_id' => $assigned_user->id,
                 'status' => TicketStatus::InProgress->value,
             ])->save();
 
