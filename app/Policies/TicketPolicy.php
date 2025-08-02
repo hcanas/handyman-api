@@ -44,7 +44,9 @@ class TicketPolicy
 
     public function resolve(User $user, Ticket $ticket): bool
     {
-        return $ticket->isInProgress() && $ticket->assigned_to_id === $user->id;
+        return $ticket->isInProgress() &&
+            $user->isTechnician() &&
+            $ticket->assigned_to_id === $user->id;
     }
 
     public function rejectResolution(User $user, Ticket $ticket): bool
