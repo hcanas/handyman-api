@@ -4,11 +4,13 @@ namespace Tests\Feature\Ticket;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\TicketResolvedNotification;
 use App\TicketAction;
 use App\TicketStatus;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -53,6 +55,8 @@ class ResolveTicketTest extends TestCase
 
     public function test_assigned_technician_can_resolve_ticket(): void
     {
+        Notification::fake();
+
         $response = $this
             ->withToken($this->token)
             ->patchJson($this->url, $this->valid_input);
@@ -73,6 +77,15 @@ class ResolveTicketTest extends TestCase
             'to_status' => TicketStatus::Resolved->value,
             'notes' => $this->valid_input['notes'],
         ]);
+
+
+        Notification::assertSentTo(
+            $this->reporter,
+            TicketResolvedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->target_ticket->id;
+            }
+        );
     }
 
     public function test_other_technicians_cannot_resolve_ticket(): void

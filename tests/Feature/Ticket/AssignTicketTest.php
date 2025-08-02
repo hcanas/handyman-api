@@ -5,11 +5,14 @@ namespace Tests\Feature\Ticket;
 use App\Models\Ticket;
 use App\Models\TicketLog;
 use App\Models\User;
+use App\Notifications\TicketAssignedNotification;
+use App\Notifications\TicketAssignmentReceivedNotification;
 use App\TicketAction;
 use App\TicketStatus;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -56,6 +59,8 @@ class AssignTicketTest extends TestCase
 
     public function test_admins_can_assign_ticket_to_technician(): void
     {
+        Notification::fake();
+
         $response = $this->withToken($this->token)->patchJson($this->url, $this->valid_input);
 
         $response->assertOk();
@@ -78,10 +83,28 @@ class AssignTicketTest extends TestCase
             'user_id' => $this->assignee->id,
             'action' => TicketAction::ReceivedAssignment->value,
         ]);
+
+        Notification::assertSentTo(
+            $this->assignee,
+            TicketAssignmentReceivedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->target_ticket->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $this->reporter,
+            TicketAssignedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->target_ticket->id;
+            }
+        );
     }
 
     public function test_admins_can_reassign_ticket_to_technician(): void
     {
+        Notification::fake();
+
         $previous_assignee = User::factory()->create();
 
         $this->target_ticket->update([
@@ -111,6 +134,22 @@ class AssignTicketTest extends TestCase
             'user_id' => $this->assignee->id,
             'action' => TicketAction::ReceivedAssignment->value,
         ]);
+
+        Notification::assertSentTo(
+            $this->assignee,
+            TicketAssignmentReceivedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->target_ticket->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $this->reporter,
+            TicketAssignedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->target_ticket->id;
+            }
+        );
     }
 
     #[DataProvider(('nonAdminUsersProvider'))]

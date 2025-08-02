@@ -4,11 +4,13 @@ namespace Tests\Feature\Ticket;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\TicketResolutionRejectedNotification;
 use App\TicketAction;
 use App\TicketStatus;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -54,6 +56,8 @@ class RejectTicketResolutionTest extends TestCase
 
     public function test_reporter_can_reject_ticket_resolution(): void
     {
+        Notification::fake();
+
         $response = $this
             ->withToken($this->token)
             ->patchJson($this->url, $this->valid_input);
@@ -74,6 +78,14 @@ class RejectTicketResolutionTest extends TestCase
             'to_status' => TicketStatus::InProgress->value,
             'notes' => $this->valid_input['notes'],
         ]);
+
+        Notification::assertSentTo(
+            $this->assignee,
+            TicketResolutionRejectedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->ticket->id;
+            }
+        );
     }
 
     public function test_cannot_reject_if_status_is_not_resolved(): void
