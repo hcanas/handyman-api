@@ -23,7 +23,7 @@ class ResolveTicketRequest extends BaseTicketStatusRequest
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status);
+            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status->value);
 
             if (!$this->isValidTransition($ticket_status, TicketStatus::Resolved)) {
                 $validator->errors()->add('action', 'Ticket cannot be resolved from its current status.');
