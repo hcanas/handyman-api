@@ -23,9 +23,7 @@ class RejectTicketResolutionRequest extends BaseTicketStatusRequest
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status);
-
-            if (!$this->isValidTransition($ticket_status, TicketStatus::InProgress)) {
+            if (!$this->isValidTransition($this->route('ticket')->status, TicketStatus::InProgress)) {
                 $validator->errors()->add('action', 'Ticket cannot be rejected from its current status.');
             }
         });
