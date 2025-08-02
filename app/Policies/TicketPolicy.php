@@ -51,8 +51,8 @@ class TicketPolicy
 
     public function rejectResolution(User $user, Ticket $ticket): bool
     {
-        return $ticket->isResolved()
-            && $user->isAdmin() || $ticket->reported_by_id === $user->id;
+        return $ticket->isResolved() &&
+            $ticket->reported_by_id === $user->id;
     }
 
     public function close(User $user, Ticket $ticket): bool
