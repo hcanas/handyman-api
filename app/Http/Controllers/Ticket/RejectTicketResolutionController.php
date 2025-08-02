@@ -23,11 +23,13 @@ class RejectTicketResolutionController extends Controller
 
             $ticket->fill([
                 'status' => TicketStatus::InProgress->value,
-            ])->save();
+            ]);
 
             $this->logActions($request, $ticket);
             $this->notifyUsers($ticket);
             $this->clearCache($ticket);
+
+            $ticket->save();
 
             DB::commit();
 
