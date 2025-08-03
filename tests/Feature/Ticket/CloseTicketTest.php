@@ -145,6 +145,17 @@ class CloseTicketTest extends TestCase
         $response->assertForbidden();
     }
 
+    #[DataProvider('invalidNotesProvider')]
+    public function test_invalid_notes_fails_validation(string $notes): void
+    {
+        $invalid_input = ['notes' => $notes];
+
+        $response = $this->withToken($this->token)->patchJson($this->url, $invalid_input);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['notes']);
+    }
+
     public static function unauthorizedUsersProvider(): array
     {
         return [
@@ -160,6 +171,13 @@ class CloseTicketTest extends TestCase
             'in progress' => [TicketStatus::InProgress->value],
             'closed' => [TicketStatus::Closed->value],
             'cancelled' => [TicketStatus::Cancelled->value],
+        ];
+    }
+
+    public static function invalidNotesProvider(): array
+    {
+        return [
+            'too long' => [str_repeat('a', 1001)],
         ];
     }
 }
