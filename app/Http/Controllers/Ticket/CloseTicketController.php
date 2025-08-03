@@ -23,11 +23,13 @@ class CloseTicketController extends Controller
 
             $ticket->fill([
                 'status' => TicketStatus::Closed->value,
-            ])->save();
+            ]);
 
             $this->logActions($request, $ticket);
             $this->notifyUsers($ticket);
             $this->clearCache($ticket);
+
+            $ticket->save();
 
             DB::commit();
 
