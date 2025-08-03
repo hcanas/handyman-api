@@ -11,11 +11,13 @@ use App\Models\Ticket;
 use App\Models\TicketLog;
 use App\Notifications\TicketCommentedNotification;
 use App\TicketAction;
+use App\TicketStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -103,12 +105,25 @@ class AddCommentController extends Controller
 
     private function notifyUsers(Ticket $ticket, Comment $comment): void
     {
-        $notifiable = $ticket->reported_by_id === $comment->user_id
-            ? $ticket->assignee
-            : $ticket->reporter;
+        $notifiables = collect([]);
 
-        if ($notifiable) {
-            $notifiable->notify(new TicketCommentedNotification($ticket));
+        if (Auth::user()->isAdmin()) {
+            $notifiables->push($ticket->reporter);
+
+            if ($ticket->assignee) {
+                $notifiables->push($ticket->assignee);
+            }
+        } elseif (Auth::id() === $ticket->reported_by_id) {
+            $notifiables->push($ticket->assignee);
+        } elseif (Auth::id() === $ticket->assigned_to_id) {
+            $notifiables->push($ticket->reporter);
+        }
+
+        if ($notifiables->isNotEmpty()) {
+            Notification::send(
+                $notifiables,
+                new TicketCommentedNotification($ticket)
+            );
         }
     }
 
