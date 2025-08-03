@@ -21,6 +21,7 @@ class ListCommentsController extends Controller
             ->remember($cache_key, $cache_ttl, function () use ($request, $ticket) {
                 return $ticket
                     ->comments()
+                    ->with('attachments')
                     ->orderBy(
                         $request->validated('order_by', 'created_at'),
                         $request->validated('order_dir', 'desc'),
