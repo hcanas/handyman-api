@@ -4,11 +4,13 @@ namespace Tests\Feature\Ticket;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\TicketClosedNotification;
 use App\TicketAction;
 use App\TicketStatus;
 use App\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -54,6 +56,8 @@ class CloseTicketTest extends TestCase
 
     public function test_admins_can_close_resolved_ticket(): void
     {
+        Notification::fake();
+
         $this->auth_user->update(['role' => UserRole::Admin->value]);
 
         $response = $this
@@ -73,10 +77,20 @@ class CloseTicketTest extends TestCase
             'from_status' => TicketStatus::Resolved->value,
             'to_status' => TicketStatus::Closed->value,
         ]);
+
+        Notification::assertSentTo(
+            $this->assignee,
+            TicketClosedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->ticket->id;
+            }
+        );
     }
 
     public function test_reporter_can_close_ticket(): void
     {
+        Notification::fake();
+
         $response = $this
             ->withToken($this->token)
             ->patchJson($this->url, $this->valid_input);
@@ -94,6 +108,14 @@ class CloseTicketTest extends TestCase
             'from_status' => TicketStatus::Resolved->value,
             'to_status' => TicketStatus::Closed->value,
         ]);
+
+        Notification::assertSentTo(
+            $this->assignee,
+            TicketClosedNotification::class,
+            function ($notification) {
+                return $notification->ticket->id === $this->ticket->id;
+            }
+        );
     }
 
     #[DataProvider('unauthorizedUsersProvider')]
