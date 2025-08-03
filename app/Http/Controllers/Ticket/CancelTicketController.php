@@ -24,11 +24,13 @@ class CancelTicketController extends Controller
 
             $ticket->fill([
                 'status' => TicketStatus::Cancelled->value,
-            ])->save();
+            ]);
 
             $this->logActions($request, $ticket);
             $this->notifyUsers($ticket);
             $this->clearCache($ticket);
+
+            $ticket->save();
 
             DB::commit();
 
@@ -66,7 +68,9 @@ class CancelTicketController extends Controller
             $notifiables->push($ticket->reporter);
         }
 
-        if ($ticket->isInProgress() && $ticket->assigned_to_id) {
+        if ($ticket->getOriginal('status') === TicketStatus::InProgress
+            && $ticket->assigned_to_id
+        ) {
             $notifiables->push($ticket->assignee);
         }
 
