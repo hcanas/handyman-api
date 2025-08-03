@@ -58,7 +58,7 @@ class TicketPolicy
     public function close(User $user, Ticket $ticket): bool
     {
         return $ticket->isResolved()
-            && $user->isAdmin() || $ticket->reported_by_id === $user->id;
+            && ($user->isAdmin() || $ticket->reported_by_id === $user->id);
     }
 
     public function cancel(User $user, Ticket $ticket): bool
