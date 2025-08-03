@@ -22,7 +22,7 @@ class AddCommentTest extends TestCase
 
     protected string $url;
 
-    public User $admin;
+    protected User $admin;
 
     protected User $reporter;
 
