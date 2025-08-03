@@ -23,9 +23,7 @@ class CloseTicketRequest extends BaseTicketStatusRequest
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $ticket_status = TicketStatus::tryFrom($this->route('ticket')->status);
-
-            if (!$this->isValidTransition($ticket_status, TicketStatus::Closed)) {
+            if (!$this->isValidTransition($this->route('ticket')->status, TicketStatus::Closed)) {
                 $validator->errors()->add('action', 'Ticket cannot be closed from its current status.');
             }
         });
