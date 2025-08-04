@@ -68,7 +68,6 @@ class SendResetPasswordOtpController extends Controller
     {
         PasswordOtp::query()
             ->where('email', $email)
-            ->where('expired_at', '>', now())
             ->delete();
     }
 }
