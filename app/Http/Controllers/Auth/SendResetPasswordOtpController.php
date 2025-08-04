@@ -36,7 +36,7 @@ class SendResetPasswordOtpController extends Controller
 
             // return success response to non-existing/banned users as well for security purposes
             return response()->json([
-                'An OTP has been sent to your email address.',
+                'message' => 'An OTP has been sent to your email address.',
             ]);
         } catch (Throwable $e) {
             DB::rollback();
