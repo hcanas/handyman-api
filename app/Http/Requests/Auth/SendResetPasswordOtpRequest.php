@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseFormRequest;
 
-class SendResetPasswordOtpRequest extends FormRequest
+/**
+ * @bodyParam email string required Must be a valid email address.
+ */
+class SendResetPasswordOtpRequest extends BaseFormRequest
 {
     public function rules(): array
     {
