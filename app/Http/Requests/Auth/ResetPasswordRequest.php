@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\BaseFormRequest;
 use App\Rules\ValidOtp;
-use Illuminate\Foundation\Http\FormRequest;
 
 class ResetPasswordRequest extends FormRequest
 {
@@ -12,6 +12,7 @@ class ResetPasswordRequest extends FormRequest
         return [
             'email' => 'bail|required|email|max:255',
             'password' => 'bail|required|confirmed|min:8',
+            'password_confirmation' => 'bail|required|same:password',
             'otp' => [
                 'bail',
                 'required',
