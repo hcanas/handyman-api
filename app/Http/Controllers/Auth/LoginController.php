@@ -44,6 +44,11 @@ class LoginController extends Controller
         return response()
             ->json([
                 'message' => 'You have logged in successfully',
+                'user' => [
+                    'name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                    'role' => Auth::user()->role,
+                ],
             ])
             ->withCookie($cookie);
     }
@@ -55,6 +60,11 @@ class LoginController extends Controller
 
         return response()->json([
             'token' => $token,
+            'user' => [
+                'name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+                'role' => Auth::user()->role,
+            ],
             'message' => 'You have logged in successfully',
         ]);
     }
