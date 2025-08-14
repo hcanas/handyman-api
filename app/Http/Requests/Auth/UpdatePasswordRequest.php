@@ -10,6 +10,7 @@ class UpdatePasswordRequest extends FormRequest
     {
         return [
             'password' => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required|same:password',
         ];
     }
 }
