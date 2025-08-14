@@ -33,8 +33,7 @@ class ListTicketsController extends Controller
                             $logs_query
                                 ->where('action', TicketAction::ReceivedAssignment->value)
                                 ->where('user_id', $user->id);
-                        })
-                        ->orWhere($user->isAdmin());
+                        });
                 }
 
                 return $query
