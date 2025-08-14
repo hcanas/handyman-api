@@ -12,6 +12,7 @@ class RegisterUserRequest extends BaseFormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email|max:255',
             'password' => 'required|string|confirmed|min:8',
+            'password_confirmation' => 'required|same:password',
         ];
     }
 }
