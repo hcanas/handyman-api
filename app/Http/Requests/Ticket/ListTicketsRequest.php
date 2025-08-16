@@ -17,6 +17,7 @@ class ListTicketsRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'keyword' => 'sometimes|string|min:1|max:255',
             'page' => 'sometimes|numeric|min:1',
             'per_page' => 'sometimes|numeric|min:1',
             'order_by' => [
@@ -25,7 +26,7 @@ class ListTicketsRequest extends BaseFormRequest
                     'created_at',
                     'updated_at',
                     'status',
-                    'priority',
+                    'priority_level',
                 ]),
             ],
             'order_dir' => [
