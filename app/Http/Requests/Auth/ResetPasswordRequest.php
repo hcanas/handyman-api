@@ -5,7 +5,7 @@ namespace App\Http\Requests\Auth;
 use App\Http\Requests\BaseFormRequest;
 use App\Rules\ValidOtp;
 
-class ResetPasswordRequest extends FormRequest
+class ResetPasswordRequest extends BaseFormRequest
 {
     public function rules(): array
     {
