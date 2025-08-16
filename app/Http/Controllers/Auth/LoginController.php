@@ -37,9 +37,18 @@ class LoginController extends Controller
 
     private function generateWebClientResponse(): JsonResponse
     {
+        $is_production = app()->environment('production');
+
         $expires_at = now()->addHours(8);
         $token = Auth::user()->createToken('web', ['*'], $expires_at)->plainTextToken;
-        $cookie = cookie('token', $token, 60 * 8);
+
+        $cookie = cookie(
+            name: 'token',
+            value: $token,
+            minutes: 60 * 10,
+            secure: $is_production,
+            sameSite: $is_production ? 'none' : 'lax',
+        );
 
         return response()
             ->json([
