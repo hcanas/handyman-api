@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DesignateUserRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 
 class DesignateUserController extends Controller
 {
-    public function __invoke(DesignateUserRequest $request, User $user)
+    /**
+     *
+     */
+    public function __invoke(DesignateUserRequest $request, User $user): JsonResponse
     {
         if ($user->isBanned()) {
             return response()->json([
