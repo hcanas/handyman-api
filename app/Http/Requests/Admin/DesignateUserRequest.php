@@ -21,7 +21,7 @@ class DesignateUserRequest extends FormRequest
                 'required',
                 Rule::in(UserRole::cases()),
             ],
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'required|integer|exists:departments,id',
         ];
     }
 }
