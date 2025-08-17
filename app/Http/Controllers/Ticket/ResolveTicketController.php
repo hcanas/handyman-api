@@ -12,10 +12,17 @@ use App\TicketStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class ResolveTicketController extends Controller
 {
+    /**
+     * Resolve Ticket
+     *
+     * Only assigned technician can resolve a ticket.
+     */
     public function __invoke(ResolveTicketRequest $request, Ticket $ticket)
     {
         try {

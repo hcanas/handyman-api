@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DesignateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('User Management')]
 class DesignateUserController extends Controller
 {
     /**
+     *  Designate User
      *
+     * Set user's role and department.
      */
     public function __invoke(DesignateUserRequest $request, User $user): JsonResponse
     {

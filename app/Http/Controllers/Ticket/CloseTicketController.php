@@ -12,10 +12,17 @@ use App\TicketStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class CloseTicketController extends Controller
 {
+    /**
+     * Close Ticket
+     *
+     * Only admins and reporter can close a ticket.
+     */
     public function __invoke(CloseTicketRequest $request, Ticket $ticket)
     {
         try {

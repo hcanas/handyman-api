@@ -6,12 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\PasswordOtp;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Account Management')]
 class ResetPasswordController extends Controller
 {
-    public function __invoke(ResetPasswordRequest $request)
+    /**
+     * Reset Password
+     *
+     * A valid OTP is required to set a new password.
+     */
+    public function __invoke(ResetPasswordRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();

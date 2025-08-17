@@ -19,10 +19,17 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class AddCommentController extends Controller
 {
+    /**
+     * Add Comment
+     *
+     * Only admins, reporter, and assignee can comment on a ticket.
+     */
     public function __invoke(StoreCommentRequest $request, Ticket $ticket): CommentResource|JsonResponse
     {
         try {

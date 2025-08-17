@@ -13,10 +13,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class CancelTicketController extends Controller
 {
+    /**
+     * Cancel Ticket
+     *
+     * Only admins and reporter can cancel a ticket.
+     */
     public function __invoke(CancelTicketRequest $request, Ticket $ticket)
     {
         try {

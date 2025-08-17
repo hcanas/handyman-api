@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('User Management')]
 class UnbanUserController extends Controller
 {
-    public function __invoke(User $user)
+    /**
+     * Unban User
+     *
+     * Only admins can unban users.
+     */
+    public function __invoke(User $user): JsonResponse
     {
         Gate::authorize('unban', $user);
 

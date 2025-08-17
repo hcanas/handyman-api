@@ -12,10 +12,17 @@ use App\TicketStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class RejectTicketResolutionController extends Controller
 {
+    /**
+     * Reject Ticket Resolution
+     *
+     * Only reporter can reject ticket resolution.
+     */
     public function __invoke(RejectTicketResolutionRequest $request, Ticket $ticket)
     {
         try {

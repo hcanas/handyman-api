@@ -8,9 +8,16 @@ use App\Http\Resources\CommentResource;
 use App\Models\Ticket;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Cache;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Ticket Management')]
 class ListCommentsController extends Controller
 {
+    /**
+     * View Ticket Comments
+     *
+     * Only admins, reporter, assignee, and previous assignee can view ticket comments.
+     */
     public function __invoke(ListCommentsRequest $request, Ticket $ticket): ResourceCollection
     {
         $cache_tags = ['comments', 'ticket:'.$ticket->id];

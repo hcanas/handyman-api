@@ -15,10 +15,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class CreateTicketController extends Controller
 {
+    /**
+     * New Ticket
+     *
+     * Only staff can create new tickets.
+     */
     public function __invoke(StoreTicketRequest $request): TicketResource|JsonResponse
     {
         try {

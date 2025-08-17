@@ -10,9 +10,14 @@ use App\TicketAction;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Ticket Management')]
 class ListTicketsController extends Controller
 {
+    /**
+     * List Tickets
+     */
     public function __invoke(ListTicketsRequest $request): ResourceCollection
     {
         $user = Auth::user();

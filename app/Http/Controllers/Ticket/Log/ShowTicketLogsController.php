@@ -8,9 +8,16 @@ use App\Http\Resources\TicketLogResource;
 use App\Models\Ticket;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Cache;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Ticket Management')]
 class ShowTicketLogsController extends Controller
 {
+    /**
+     * View Ticket Logs
+     *
+     * Only admins can view ticket logs.
+     */
     public function __invoke(ShowTicketLogsRequest $request, Ticket $ticket): ResourceCollection
     {
         $cache_tags = ['logs', 'ticket:'.$ticket->id];

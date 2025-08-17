@@ -10,10 +10,20 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Account Management')]
 class SendResetPasswordOtpController extends Controller
 {
+    /**
+     * Request OTP
+     *
+     * A 6 digit OTP will be sent to the registered email which is required to reset the password.
+     * Unregistered emails and banned users will not receive an OTP but no error will be returned.
+     * <br><br>
+     * The OTP expires in 10 minutes.
+     */
     public function __invoke(SendResetPasswordOtpRequest $request): JsonResponse
     {
         try {

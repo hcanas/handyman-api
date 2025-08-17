@@ -8,9 +8,21 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Account Management')]
 class LoginController extends Controller
 {
+    /**
+     * Login
+     *
+     * Returns the token value depending on specified X-Client-Platform.
+     * - web &mdash; returns token inside a secure cookie
+     * - mobile &mdash; returns token as json variable
+     *
+     * @unauthenticated
+     * @header X-Client-Platform web
+     */
     public function __invoke(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only(['email', 'password']);

@@ -7,9 +7,18 @@ use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Knuckles\Scribe\Attributes\Group;
 
+#[Group('Account Management')]
 class RegisterController extends Controller
 {
+    /**
+     * Register
+     *
+     * Create a new account.
+     *
+     * @unauthenticated
+     */
     public function __invoke(RegisterUserRequest $request): JsonResponse
     {
         User::create([

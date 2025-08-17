@@ -6,6 +6,10 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
+/**
+ * @bodyParam email string required
+ * @bodyParam password string required Example: -0pBNvYgxw
+ */
 class LoginRequest extends FormRequest
 {
     public function rules(): array

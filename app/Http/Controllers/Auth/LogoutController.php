@@ -7,9 +7,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\Subgroup;
 
+#[Group('Account Management')]
 class LogoutController extends Controller
 {
+    /**
+     * Logout
+     *
+     * Deletes current token from the database.
+     *
+     * If the user logged in via "web" platform, it will delete the token inside the cookie as well.
+     *
+     * @header X-Client-Platform web
+     */
     public function __invoke(Request $request): JsonResponse
     {
         $client = ClientType::tryFrom($request->header('X-Client-Platform'));

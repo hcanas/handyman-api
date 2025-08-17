@@ -15,10 +15,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Knuckles\Scribe\Attributes\Group;
 use Throwable;
 
+#[Group('Ticket Management')]
 class AssignTicketController extends Controller
 {
+    /**
+     * Assign Ticket
+     *
+     * Only admins can assign tickets to technicians.
+     */
     public function __invoke(AssignTicketRequest $request, Ticket $ticket): JsonResponse
     {
         try {
