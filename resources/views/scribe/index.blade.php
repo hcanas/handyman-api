@@ -26,7 +26,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://localhost:8000";
+        var tryItOutBaseUrl = "https://handyman-api-production-d322.up.railway.app";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -190,7 +190,7 @@
     <div class="content">
         <h1 id="introduction">Introduction</h1>
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost:8000</code>
+    <strong>Base URL</strong>: <code>https://handyman-api-production-d322.up.railway.app</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -220,7 +220,7 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/register" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/register" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -234,7 +234,7 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/register"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/register"
 );
 
 const headers = {
@@ -392,7 +392,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/login" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/login" \
     --header "X-Client-Platform: web" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -405,7 +405,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/login"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/login"
 );
 
 const headers = {
@@ -551,7 +551,7 @@ The OTP expires in 10 minutes.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/request-otp" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/request-otp" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -563,7 +563,7 @@ The OTP expires in 10 minutes.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/request-otp"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/request-otp"
 );
 
 const headers = {
@@ -694,7 +694,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/reset-password" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/reset-password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -709,7 +709,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/reset-password"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/reset-password"
 );
 
 const headers = {
@@ -877,7 +877,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/logout" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/logout" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "X-Client-Platform: web" \
     --header "Content-Type: application/json" \
@@ -886,7 +886,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/logout"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/logout"
 );
 
 const headers = {
@@ -1012,7 +1012,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/update-password" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/update-password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -1025,7 +1025,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/update-password"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/update-password"
 );
 
 const headers = {
@@ -1172,7 +1172,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/departments" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/departments" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1180,7 +1180,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/departments"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments"
 );
 
 const headers = {
@@ -1311,7 +1311,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/departments" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -1323,7 +1323,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/departments"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments"
 );
 
 const headers = {
@@ -1454,7 +1454,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/departments/1" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1462,7 +1462,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/departments/1"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1"
 );
 
 const headers = {
@@ -1606,7 +1606,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost:8000/api/v1/departments/1" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1614,7 +1614,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/departments/1"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1"
 );
 
 const headers = {
@@ -1740,7 +1740,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/departments/1" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -1752,7 +1752,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/departments/1"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/departments/1"
 );
 
 const headers = {
@@ -1899,7 +1899,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/tickets" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/tickets" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -1907,7 +1907,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"keyword\": \"b\",
     \"page\": 22,
     \"per_page\": 67,
-    \"order_by\": \"updated_at\",
+    \"order_by\": \"status\",
     \"order_dir\": \"asc\"
 }"
 </code></pre></div>
@@ -1915,7 +1915,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets"
 );
 
 const headers = {
@@ -1928,7 +1928,7 @@ let body = {
     "keyword": "b",
     "page": 22,
     "per_page": 67,
-    "order_by": "updated_at",
+    "order_by": "status",
     "order_dir": "asc"
 };
 
@@ -2079,10 +2079,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="order_by"                data-endpoint="GETapi-v1-tickets"
-               value="updated_at"
+               value="status"
                data-component="body">
     <br>
-<p>Example: <code>updated_at</code></p>
+<p>Example: <code>status</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>created_at</code></li> <li><code>updated_at</code></li> <li><code>status</code></li> <li><code>priority_level</code></li></ul>
         </div>
@@ -2115,7 +2115,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/tickets" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2129,7 +2129,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets"
 );
 
 const headers = {
@@ -2286,7 +2286,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/tickets/architecto" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/architecto" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2294,7 +2294,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/architecto"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/architecto"
 );
 
 const headers = {
@@ -2437,7 +2437,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2450,7 +2450,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251"
 );
 
 const headers = {
@@ -2605,7 +2605,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251/assign" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/assign" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2618,7 +2618,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/assign"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/assign"
 );
 
 const headers = {
@@ -2773,7 +2773,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251/resolve" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/resolve" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2785,7 +2785,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/resolve"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/resolve"
 );
 
 const headers = {
@@ -2928,7 +2928,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251/reject-resolution" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/reject-resolution" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2940,7 +2940,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/reject-resolution"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/reject-resolution"
 );
 
 const headers = {
@@ -3083,7 +3083,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251/close" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/close" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3095,7 +3095,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/close"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/close"
 );
 
 const headers = {
@@ -3238,7 +3238,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/tickets/251/cancel" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/cancel" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3250,7 +3250,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/cancel"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/cancel"
 );
 
 const headers = {
@@ -3393,7 +3393,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/tickets/251/comments" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/comments" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3408,7 +3408,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/comments"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/comments"
 );
 
 const headers = {
@@ -3608,17 +3608,17 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8000/api/v1/tickets/251/comments" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/comments" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "message=b"\
-    --form "file=@/tmp/php5lb1phu16d5fcMBgAnB" </code></pre></div>
+    --form "file=@/tmp/phpa3r67v8gievp9gIkHPH" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/comments"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/comments"
 );
 
 const headers = {
@@ -3754,7 +3754,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>This field is required when <code>message</code> is not present. Must be a file. Must not be greater than 5120 kilobytes. Example: <code>/tmp/php5lb1phu16d5fcMBgAnB</code></p>
+<p>This field is required when <code>message</code> is not present. Must be a file. Must not be greater than 5120 kilobytes. Example: <code>/tmp/phpa3r67v8gievp9gIkHPH</code></p>
         </div>
         </form>
 
@@ -3772,7 +3772,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/tickets/251/logs" \
+    --get "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/logs" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3780,14 +3780,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"page\": 16,
     \"per_page\": 22,
     \"order_by\": \"created_at\",
-    \"order_dir\": \"desc\"
+    \"order_dir\": \"asc\"
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/tickets/251/logs"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/tickets/251/logs"
 );
 
 const headers = {
@@ -3800,7 +3800,7 @@ let body = {
     "page": 16,
     "per_page": 22,
     "order_by": "created_at",
-    "order_dir": "desc"
+    "order_dir": "asc"
 };
 
 fetch(url, {
@@ -3964,10 +3964,10 @@ Must be one of:
 <i>optional</i> &nbsp;
                 <input type="text" style="display: none"
                               name="order_dir"                data-endpoint="GETapi-v1-tickets--ticket_id--logs"
-               value="desc"
+               value="asc"
                data-component="body">
     <br>
-<p>This field is required when <code>order_by</code> is present. Example: <code>desc</code></p>
+<p>This field is required when <code>order_by</code> is present. Example: <code>asc</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>asc</code></li> <li><code>desc</code></li></ul>
         </div>
@@ -3991,12 +3991,12 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/user/1/designate" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/designate" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"role\": \"technician\",
+    \"role\": \"admin\",
     \"department_id\": 16
 }"
 </code></pre></div>
@@ -4004,7 +4004,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/user/1/designate"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/designate"
 );
 
 const headers = {
@@ -4014,7 +4014,7 @@ const headers = {
 };
 
 let body = {
-    "role": "technician",
+    "role": "admin",
     "department_id": 16
 };
 
@@ -4127,10 +4127,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="role"                data-endpoint="PATCHapi-v1-user--user_id--designate"
-               value="technician"
+               value="admin"
                data-component="body">
     <br>
-<p>Example: <code>technician</code></p>
+<p>Example: <code>admin</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>admin</code></li> <li><code>staff</code></li> <li><code>technician</code></li></ul>
         </div>
@@ -4161,7 +4161,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/user/1/ban" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/ban" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -4173,7 +4173,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/user/1/ban"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/ban"
 );
 
 const headers = {
@@ -4316,7 +4316,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/user/1/unban" \
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/unban" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4324,7 +4324,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8000/api/v1/user/1/unban"
+    "https://handyman-api-production-d322.up.railway.app/api/v1/user/1/unban"
 );
 
 const headers = {

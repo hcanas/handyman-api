@@ -60,7 +60,7 @@ endpoints:
         name: order_by
         description: ''
         required: false
-        example: updated_at
+        example: status
         type: string
         enumValues:
           - created_at
@@ -86,7 +86,7 @@ endpoints:
       keyword: b
       page: 22
       per_page: 67
-      order_by: updated_at
+      order_by: status
       order_dir: asc
     fileParameters: []
     responses:
@@ -840,7 +840,7 @@ endpoints:
         name: order_dir
         description: 'This field is required when <code>order_by</code> is present.'
         required: false
-        example: desc
+        example: asc
         type: string
         enumValues:
           - asc
@@ -852,7 +852,7 @@ endpoints:
       page: 16
       per_page: 22
       order_by: created_at
-      order_dir: desc
+      order_dir: asc
     fileParameters: []
     responses:
       -

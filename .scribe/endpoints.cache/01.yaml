@@ -41,7 +41,7 @@ endpoints:
         name: role
         description: ''
         required: true
-        example: technician
+        example: admin
         type: string
         enumValues:
           - admin
@@ -61,7 +61,7 @@ endpoints:
         nullable: false
         custom: []
     cleanBodyParameters:
-      role: technician
+      role: admin
       department_id: 16
     fileParameters: []
     responses: []

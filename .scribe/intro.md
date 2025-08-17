@@ -3,7 +3,7 @@
 
 
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost:8000</code>
+    <strong>Base URL</strong>: <code>https://handyman-api-production-d322.up.railway.app</code>
 </aside>
 
     This documentation aims to provide all the information you need to work with our API.
